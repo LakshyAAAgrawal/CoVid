@@ -9,7 +9,12 @@
 	</div>
   <a href="" id="a" download>click here to download your file</a>
   <button onclick="download( 'mouseMovements.txt', 'text/plain')">Create file</button>
+  <!--  upload file  -->
+  <input type="file" id="myFile" multiple size="1" onchange="myFunction()">
+  <button id="replayButton" onclick="startReply()" >replayButton</button>
+
        <script src="script.js"></script>
+       <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
 
   </body>
