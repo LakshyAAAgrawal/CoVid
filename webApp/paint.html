@@ -2,8 +2,8 @@
 <html>
   <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	
 	<script src="decl.js"></script>
+    <link rel="stylesheet" href="styles.css">
   </head>
   
   <body data-rsssl=1>
@@ -32,7 +32,11 @@
 		<th></th>
 
 		<th>
-		  <button text="New slide" onclick="new_slide();"></button>
+		  <button onclick="new_slide();">New slide</button>
+		  <a href="" id="a" download>click here to download your file</a>
+		  <button onclick="download( 'mouseMovements.txt', 'text/plain')">Create file</button>
+		  <input type="file" id="myFile" multiple size="1" onchange="read_and_upload_file()">
+		  <button id="replayButton" onclick="startReply()" >replayButton</button>
 		</th>
 
 		<th></th>
