@@ -10,12 +10,17 @@ var savedMovements;
 var savedt0;
 var globalID;
 
+function startRecord(){
+	t0 = performance.now();
+	movements = new Array();
+}
+
 function new_slide(){
-	var slide_id = "slide" + (num_slides++);
+	var slide_id = (num_slides++);
 	var new_canvas = $('<canvas/>', {"style":"border: solid 5pt blue", "width":800, "height":600, "id":slide_id}).get(0);
 	canvas_dict[slide_id] = new_canvas;
 	$("#canvas_list").append(new_canvas);
-	new_canvas.style.display = 'none'; 
+	new_canvas.style.display = 'none';
 	var ctx = new_canvas.getContext('2d');
 	ctx.canvas.width = 800;
 	ctx.canvas.height = 600;
@@ -23,11 +28,12 @@ function new_slide(){
 	ctx.lineJoin = 'round';
 	ctx.lineCap = 'round';
 	ctx.strokeStyle = '#00CC99';
-	var switch_btn = $('<button/>').text(slide_id).click(
+	var switch_btn = $('<button/>').text("Slide " + slide_id).click(
 		function () {
 			set_current(slide_id);
 		}
 	);
+
 	$("#slides_list").append(switch_btn);
 
 	var t1 = performance.now();
@@ -42,13 +48,13 @@ function set_current(slide_id){
 	if(typeof current_canvas !== 'undefined'){
 		current_canvas.style.display = 'none';
 		current_canvas.removeEventListener('mousemove', updateMousePos, false);
-		current_canvas.removeEventListener('mousedown', draw_start, false);	
+		current_canvas.removeEventListener('mousedown', draw_start, false);
 		current_canvas.removeEventListener('mouseup', draw_stop, false);
 	}
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
-	current_canvas.addEventListener('mousedown', draw_start, false);	
+	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
 
 	var t1 = performance.now();
@@ -57,7 +63,25 @@ function set_current(slide_id){
 		action: "change_slide",
 		action_param: [slide_id]
 	});
-	
+
+}
+
+function change_slide(increment){
+	var new_slide_id = parseInt(current_canvas.id) + increment;
+	if(new_slide_id>=0 && new_slide_id<num_slides ){
+		set_current(new_slide_id);
+	}
+}
+
+function change_color(color){
+
+	var t1 = performance.now();
+	movements.push({
+		t: t1 - t0,
+		action: "change_color",
+		action_param: [color]
+	});
+	current_canvas.getContext('2d').strokeStyle = color;
 }
 
 var onPaint = function() {
@@ -67,7 +91,7 @@ var onPaint = function() {
 	var ctx = current_canvas.getContext('2d');
     ctx.lineTo(mousex, mousey);
     ctx.stroke();
-	var move = {x: mousex, y: mouse.y, t:(t1-t0)};
+	var move = {x: mousex, y: mousey, t:(t1-t0)};
     movements.push(move);
 };
 

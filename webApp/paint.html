@@ -5,7 +5,7 @@
 	<script src="decl.js"></script>
     <link rel="stylesheet" href="styles.css">
   </head>
-  
+
   <body data-rsssl=1>
 	<table>
 	  <tr>
@@ -13,36 +13,44 @@
 		<th>CoVid</th>
 		<th></th>
 	  <tr/>
-	  
+
 	  <tr>
 		<th>
 		  Slides
 		   <ol id="slides_list">
-		   </ol> 
+			<li><button id="recordButton" onclick="change_slide(1)" >Next Slide</button></li>
+			<li><button id="recordButton" onclick="change_slide(-1)" >Previous Slide</button></li>
+		   </ol>
 		</th>
-		
+
 		<th>
 		  <ol id="canvas_list"></ol>
 		</th>
-		
+
 		<th></th>
 	  <tr/>
-	  
+
 	  <tr>
 		<th></th>
 
 		<th>
 		  <button onclick="new_slide();">New slide</button>
-		  <a href="" id="a" download>click here to download your file</a>
-		  <button onclick="download( 'mouseMovements.txt', 'text/plain')">Create file</button>
 		  <input type="file" id="myFile" multiple size="1" onchange="read_and_upload_file()">
-		  <button id="replayButton" onclick="startReply()" >replayButton</button>
+		  <button id="replayButton" onclick="startReply()" >Replay</button>
+
+		  <button id="recordButton" onclick="startRecord()" >Start Record</button>
+		  <a href="" id="a" download>click here to download your file</a>
+		  <button onclick="download( 'mouseMovements.txt', 'text/plain')">Stop Record</button>
 		</th>
+		<input type="button" style="background-color:#000000"  onclick="change_color('#000000')">
+		<input type="button" style="background-color:#00CC99"  onclick="change_color('#00CC99')">
+		<input type="button" style="background-color:#cc1f00"  onclick="change_color('#cc1f00')">
+		<input type="button" style="background-color:#00cc25"  onclick="change_color('#00cc25')">
 
 		<th></th>
 	  <tr/>
 	</table>
-	
+
 	<script src="init.js"></script>
   </body>
 </html>
