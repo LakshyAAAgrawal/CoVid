@@ -50,12 +50,23 @@ function set_current(slide_id){
 		current_canvas.removeEventListener('mousemove', updateMousePos, false);
 		current_canvas.removeEventListener('mousedown', draw_start, false);
 		current_canvas.removeEventListener('mouseup', draw_stop, false);
+
+		current_canvas.removeEventListener('touchmove', updateTouchPos, false);
+		current_canvas.removeEventListener('touchstart', draw_start_touch, false);
+		current_canvas.removeEventListener('touchend', draw_stop, false);
+		current_canvas.removeEventListener('touchcancel', draw_stop, false);
+
 	}
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
+
+	current_canvas.addEventListener('touchmove', updateTouchPos, false);
+	current_canvas.addEventListener('touchstart', draw_start_touch, false);
+	current_canvas.addEventListener('touchend', draw_stop, false);
+	current_canvas.addEventListener('touchcancel', draw_stop, false);
 
 	var t1 = performance.now();
 	movements.push({
@@ -66,27 +77,22 @@ function set_current(slide_id){
 
 }
 
-function change_slide(increment){
-	var new_slide_id = parseInt(current_canvas.id) + increment;
-	if(new_slide_id>=0 && new_slide_id<num_slides ){
-		set_current(new_slide_id);
-	}
-}
-
-function change_color(color){
-
-	var t1 = performance.now();
-	movements.push({
-		t: t1 - t0,
-		action: "change_color",
-		action_param: [color]
-	});
-	current_canvas.getContext('2d').strokeStyle = color;
-}
-
 var onPaint = function() {
 	var mousex = mouse.x;
     var mousey = mouse.y;
+	var t1 = performance.now();
+	var ctx = current_canvas.getContext('2d');
+	ctx.lineTo(mousex, mousey);
+
+    ctx.stroke();
+	var move = {x: mousex, y: mousey, t:(t1-t0)};
+    movements.push(move);
+};
+
+/*
+var onPaintTouch = function() {
+	var mousex = e.changedTouches[0].clientX;
+    var mousey = e.changedTouches[0].clientY;
 	var t1 = performance.now();
 	var ctx = current_canvas.getContext('2d');
     ctx.lineTo(mousex, mousey);
@@ -94,26 +100,66 @@ var onPaint = function() {
 	var move = {x: mousex, y: mousey, t:(t1-t0)};
     movements.push(move);
 };
+*/
+
+
 
 var draw_stop = function() {
 	current_canvas.removeEventListener('mousemove', onPaint, false);
+	current_canvas.removeEventListener('touchmove', onPaint, false);
+	console.log("fffffffff");
 };
+
+
 
 var draw_start = function(e) {
 	var ctx = current_canvas.getContext('2d');
 	ctx.beginPath();
 	ctx.moveTo(mouse.x, mouse.y);
+	console.log("ii");
 	var t1 = performance.now();
 	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
-    movements.push(move);
+	movements.push(move);
 	current_canvas.addEventListener('mousemove', onPaint, false);
+
 };
+
+
+
+
+var draw_start_touch = function(e) {
+	var ctx = current_canvas.getContext('2d');
+	updateTouchPos(e);
+	ctx.beginPath();
+	ctx.moveTo(mouse.x, mouse.y);
+	console.log("ii");
+	var t1 = performance.now();
+	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
+	movements.push(move);
+	current_canvas.addEventListener('mousemove', onPaint, false);
+	current_canvas.addEventListener('touchmove', onPaint, false);
+};
+
+
+
+
 
 function updateMousePos(evt) {
 	var rect = current_canvas.getBoundingClientRect();
     mouse.x = evt.clientX - rect.left;
     mouse.y = evt.clientY - rect.top;
 }
+
+function updateTouchPos(evt) {
+	var rect = current_canvas.getBoundingClientRect();
+    mouse.x = evt.changedTouches[0].clientX - rect.left;
+	mouse.y = evt.changedTouches[0].clientY - rect.top;
+	console.log("move");
+}
+
+
+
+
 
 function download(name, type) {
     var a = document.getElementById("a");
@@ -189,4 +235,23 @@ function read_and_upload_file(){
 		}
     }
     document.getElementById("demo").innerHTML = txt;
+}
+
+
+function change_slide(increment){
+	var new_slide_id = parseInt(current_canvas.id) + increment;
+	if(new_slide_id>=0 && new_slide_id<num_slides ){
+		set_current(new_slide_id);
+	}
+}
+
+function change_color(color){
+
+	var t1 = performance.now();
+	movements.push({
+		t: t1 - t0,
+		action: "change_color",
+		action_param: [color]
+	});
+	current_canvas.getContext('2d').strokeStyle = color;
 }
