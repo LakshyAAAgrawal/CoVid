@@ -11,6 +11,8 @@ var savedt0;
 var globalID;
 var debug_count = 0;
 var to_record = true;
+var canvas_height = 600;
+var canvas_width = 800;
 
 function record_to_movements(entry){
 	if(to_record){
@@ -25,13 +27,13 @@ function startRecord(){
 
 function new_slide(){
 	var slide_id = (num_slides++);
-	var new_canvas = $('<canvas/>', {"style":"border: solid 5pt blue", "width":800, "height":600, "id":slide_id}).get(0);
+	var new_canvas = $('<canvas/>', {"style":"border: solid 5pt blue", "width":canvas_width, "height":canvas_height, "id":slide_id}).get(0);
 	canvas_dict[slide_id] = new_canvas;
 	$("#canvas_list").append(new_canvas);
 	new_canvas.style.display = 'none';
 	var ctx = new_canvas.getContext('2d');
-	ctx.canvas.width = 800;
-	ctx.canvas.height = 600;
+	ctx.canvas.width = canvas_width;
+	ctx.canvas.height = canvas_height;
 	ctx.lineWidth = 3;
 	ctx.lineJoin = 'round';
 	ctx.lineCap = 'round';
@@ -234,30 +236,51 @@ function read_and_upload_file(){
 
 function handleFileSelect(evt) {
     var files = evt.target.files;	
-    // Loop through the FileList and render image files as thumbnails.
     for (var i = 0, f; f = files[i]; i++) {
-		
-		// Only process image files.
-		if (!f.type.match('image.*')) {
-			continue;
+		if (f.type.match('image.*')) {
+			var reader = new FileReader();
+			reader.addEventListener("load", function(e) {
+				var image = new Image();
+				image.src = e.target.result;
+				image.onload = function(){
+					var tmp = to_record;
+					to_record = false;
+					new_slide_id = new_slide();
+					to_record = tmp;
+					canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, canvas_width, canvas_height);
+				}
+			}, false);
+			reader.readAsDataURL(f);
+		}else if(f.type == "application/pdf"){
+			var reader = new FileReader();
+			reader.addEventListener("load", function(e) {
+				var pdfData = atob(e.target.result.slice(e.target.result.search(";base64,") + 8));
+				var pdfjsLib = window['pdfjs-dist/build/pdf'];
+				var loadingTask = pdfjsLib.getDocument({data: pdfData});
+				loadingTask.promise.then(function(pdf) {
+					var pageNumber = 1;
+					for(var i = 1; i <= pdf.numPages; i++){
+						pdf.getPage(i).then(function(page) {
+							var scale = 1;
+							var unscaledViewport = page.getViewport({scale: scale});
+							canvas = canvas_dict[new_slide()];
+							var r_scale = Math.min((canvas_height / unscaledViewport.height), (canvas_width / unscaledViewport.width));
+							var viewport = page.getViewport({scale : r_scale});
+							var context = canvas.getContext('2d');
+							var renderContext = {
+								canvasContext: context,
+								viewport: viewport
+							};
+							var renderTask = page.render(renderContext);
+							renderTask.promise.then(function () {
+							});
+						});
+					}
+				}, function (reason) {
+				});
+				
+			}, false);
+			reader.readAsDataURL(f);
 		}
-		
-		var reader = new FileReader();
-		
-		// Closure to capture the file information.
-		reader.addEventListener("load", function(e) {
-			var image = new Image();
-			image.src = e.target.result;
-			image.onload = function(){
-				var tmp = to_record;
-				to_record = false;
-				new_slide_id = new_slide();
-				to_record = tmp;
-				canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, 800, 600);
-			}
-		}, false);
-		
-		// Read in the image file as a data URL.
-		reader.readAsDataURL(f);
     }
 }
