@@ -59,9 +59,10 @@ function set_current(slide_id){
 		current_canvas.removeEventListener('mousedown', draw_start, false);
 		current_canvas.removeEventListener('mouseup', draw_stop, false);
 
-		//current_canvas.removeEventListener('touchmove', updateMousePos, false);
-		//current_canvas.removeEventListener('touchstart', draw_start, false);	
-		//current_canvas.removeEventListener('touchend', draw_stop, false);
+		current_canvas.removeEventListener('touchmove', updateTouchPos, false);
+		current_canvas.removeEventListener('touchstart', draw_start_touch, false);
+		current_canvas.removeEventListener('touchend', draw_stop, false);
+		current_canvas.removeEventListener('touchcancel', draw_stop, false);
 	}
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
@@ -69,9 +70,11 @@ function set_current(slide_id){
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
 
-	//current_canvas.addEventListener('touchmove', updateMousePos, false);
-	//current_canvas.addEventListener('touchstart', draw_start, false);	
-	//current_canvas.addEventListener('touchend', draw_stop, false);
+
+	current_canvas.addEventListener('touchmove', updateTouchPos, false);
+	current_canvas.addEventListener('touchstart', draw_start_touch, false);
+	current_canvas.addEventListener('touchend', draw_stop, false);
+	current_canvas.addEventListener('touchcancel', draw_stop, false);
 
 	var t1 = performance.now();
 	record_to_movements({
@@ -105,7 +108,8 @@ var onPaint = function() {
     var mousey = mouse.y;
 	var t1 = performance.now();
 	var ctx = current_canvas.getContext('2d');
-    ctx.lineTo(mousex, mousey);
+	ctx.lineTo(mousex, mousey);
+
     ctx.stroke();
 	var move = {x: mousex, y: mouse.y, t:(t1-t0)};
     record_to_movements(move);
@@ -113,6 +117,7 @@ var onPaint = function() {
 
 var draw_stop = function() {
 	current_canvas.removeEventListener('mousemove', onPaint, false);
+	current_canvas.removeEventListener('touchmove', onPaint, false);
 };
 
 var draw_start = function(e) {
@@ -123,6 +128,18 @@ var draw_start = function(e) {
 	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
     record_to_movements(move);
 	current_canvas.addEventListener('mousemove', onPaint, false);
+
+};
+
+var draw_start_touch = function(e) {
+	var ctx = current_canvas.getContext('2d');
+	updateTouchPos(e);
+	ctx.beginPath();
+	ctx.moveTo(mouse.x, mouse.y);
+	var t1 = performance.now();
+	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
+	movements.push(move);
+	current_canvas.addEventListener('touchmove', onPaint, false);
 };
 
 function updateMousePos(evt) {
@@ -130,6 +147,12 @@ function updateMousePos(evt) {
     mouse.x = evt.clientX - rect.left;
     mouse.y = evt.clientY - rect.top;
 	$('#debug_elm').text(mouse.x + " " + mouse.y);
+}
+
+function updateTouchPos(evt) {
+	var rect = current_canvas.getBoundingClientRect();
+    mouse.x = evt.changedTouches[0].clientX - rect.left;
+	mouse.y = evt.changedTouches[0].clientY - rect.top;
 }
 
 function download(name, type) {
