@@ -41,8 +41,9 @@ function new_slide(){
 			set_current(slide_id);
 		}
 	);
-
-	$("#slides_list").append(switch_btn);
+	var li  = $('<li/>');
+	li.append(switch_btn);
+	$("#slides_list").append(li);
 
 	var t1 = performance.now();
 	record_to_movements({

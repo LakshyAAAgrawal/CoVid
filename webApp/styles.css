@@ -3,4 +3,10 @@
 #body {
     margin: 0px;
     padding: 0px;
-  }
+}
+
+.scrollable {
+    width: 300px;
+    height: 400px;
+    overflow-x: scroll;
+}
