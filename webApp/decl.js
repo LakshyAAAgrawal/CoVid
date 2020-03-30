@@ -66,6 +66,11 @@ function set_current(slide_id){
 		current_canvas.removeEventListener('touchstart', draw_start_touch, false);
 		current_canvas.removeEventListener('touchend', draw_stop, false);
 		current_canvas.removeEventListener('touchcancel', draw_stop, false);
+
+		current_canvas.removeEventListener('touchmove', prevent_touch_move_callback, false);
+		current_canvas.removeEventListener('touchstart', prevent_touch_move_callback, false);
+		current_canvas.removeEventListener('touchend', prevent_touch_move_callback, false);
+		current_canvas.removeEventListener('touchcancel', prevent_touch_move_callback, false);
 	}
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
@@ -79,6 +84,11 @@ function set_current(slide_id){
 	current_canvas.addEventListener('touchend', draw_stop, false);
 	current_canvas.addEventListener('touchcancel', draw_stop, false);
 
+	current_canvas.addEventListener('touchmove', prevent_touch_move_callback, false);
+	current_canvas.addEventListener('touchstart', prevent_touch_move_callback, false);
+	current_canvas.addEventListener('touchend', prevent_touch_move_callback, false);
+	current_canvas.addEventListener('touchcancel', prevent_touch_move_callback, false);
+
 	var t1 = performance.now();
 	record_to_movements({
 		t: t1 - t0,
@@ -87,6 +97,12 @@ function set_current(slide_id){
 	});
 	
 	$('#debug_elm').text(mouse.x + " " + mouse.y);
+}
+
+function prevent_touch_move_callback(e) {
+	if (e.target == current_canvas) {
+		e.preventDefault();
+	}
 }
 
 function change_slide(increment){
