@@ -89,60 +89,32 @@ var onPaint = function() {
     movements.push(move);
 };
 
-/*
-var onPaintTouch = function() {
-	var mousex = e.changedTouches[0].clientX;
-    var mousey = e.changedTouches[0].clientY;
-	var t1 = performance.now();
-	var ctx = current_canvas.getContext('2d');
-    ctx.lineTo(mousex, mousey);
-    ctx.stroke();
-	var move = {x: mousex, y: mousey, t:(t1-t0)};
-    movements.push(move);
-};
-*/
-
-
-
 var draw_stop = function() {
 	current_canvas.removeEventListener('mousemove', onPaint, false);
 	current_canvas.removeEventListener('touchmove', onPaint, false);
-	console.log("fffffffff");
 };
-
-
 
 var draw_start = function(e) {
 	var ctx = current_canvas.getContext('2d');
 	ctx.beginPath();
 	ctx.moveTo(mouse.x, mouse.y);
-	console.log("ii");
 	var t1 = performance.now();
 	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
 	movements.push(move);
 	current_canvas.addEventListener('mousemove', onPaint, false);
 
 };
-
-
-
 
 var draw_start_touch = function(e) {
 	var ctx = current_canvas.getContext('2d');
 	updateTouchPos(e);
 	ctx.beginPath();
 	ctx.moveTo(mouse.x, mouse.y);
-	console.log("ii");
 	var t1 = performance.now();
 	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
 	movements.push(move);
-	current_canvas.addEventListener('mousemove', onPaint, false);
 	current_canvas.addEventListener('touchmove', onPaint, false);
 };
-
-
-
-
 
 function updateMousePos(evt) {
 	var rect = current_canvas.getBoundingClientRect();
@@ -154,12 +126,7 @@ function updateTouchPos(evt) {
 	var rect = current_canvas.getBoundingClientRect();
     mouse.x = evt.changedTouches[0].clientX - rect.left;
 	mouse.y = evt.changedTouches[0].clientY - rect.top;
-	console.log("move");
 }
-
-
-
-
 
 function download(name, type) {
     var a = document.getElementById("a");
@@ -173,8 +140,6 @@ function download(name, type) {
 function updateMovement(){
     var curmove = savedMovements.shift();
 	var ctx = current_canvas.getContext('2d');
-    //console.log("mm");
-    console.log(curmove);
     if ('s' in curmove){
 		//mouseSimulate(curmov.x,curmov.y,"mousedown")
 		ctx.beginPath();
@@ -220,7 +185,7 @@ function read_and_upload_file(){
 				var fr = new FileReader();
 				fr.onload = function(e) {
 					savedMovements = JSON.parse( e.target.result );
-					console.log(savedMovements);
+					//console.log(savedMovements);
 				};
 				fr.readAsText(filee);
 			}
