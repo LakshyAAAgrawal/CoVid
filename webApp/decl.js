@@ -11,8 +11,10 @@ var savedt0;
 var globalID;
 var debug_count = 0;
 var to_record = true;
-var canvas_height = 600;
-var canvas_width = 800;
+var canvas_height = 700;
+var canvas_width = 1000;
+
+
 
 function record_to_movements(entry){
 	if(to_record){
@@ -85,7 +87,7 @@ function set_current(slide_id){
 		action: "change_slide",
 		action_param: [slide_id]
 	});
-	
+
 	$('#debug_elm').text(mouse.x + " " + mouse.y);
 }
 
@@ -235,7 +237,7 @@ function read_and_upload_file(){
 }
 
 function handleFileSelect(evt) {
-    var files = evt.target.files;	
+    var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
 		if (f.type.match('image.*')) {
 			var reader = new FileReader();
@@ -278,9 +280,23 @@ function handleFileSelect(evt) {
 					}
 				}, function (reason) {
 				});
-				
+
 			}, false);
 			reader.readAsDataURL(f);
 		}
     }
+}
+
+function exportPDF(){
+	var doc = new jsPDF('l');
+
+	for(var index in canvas_dict){
+		var imgData = canvas_dict[index].toDataURL(
+			'image/png');
+		console.log("er");
+		doc.addImage(imgData, 'PNG', 0, 0);
+		doc.addPage();
+	}
+
+	doc.save('sample-file.pdf');
 }

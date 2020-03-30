@@ -8,23 +8,19 @@
   </head>
 
   <body data-rsssl=1>
+	<font size="6"><strong>CoVid </strong>  </font>
 	<table>
-	  <tr>
-		<th></th>
-		<th>CoVid</th>
-		<th></th>
-	  <tr/>
-	  
 	  <tr>
 		<th>
 		  Slides
-		  <ol>
+		  <ul>
 			<li><button id="recordButton" onclick="change_slide(1)" >Next Slide</button></li>
 			<li><button id="recordButton" onclick="change_slide(-1)" >Previous Slide</button></li>
-		  </ol>
+		  </ul>
 		  <div class="bscrollable">
 			<ol id="slides_list">
 			</ol>
+			<button onclick="new_slide();">Add New slide</button> <br>
 		  </div>
 		</th>
 
@@ -41,8 +37,10 @@
 			<li><input type="button" style="background-color:#475F94"  onclick="change_color('#475F94')"></li>
 			<li><input type="button" style="background-color:#FDDC5C"  onclick="change_color('#FDDC5C')"></li>
 			<li><input type="button" style="background-color:#FA4224"  onclick="change_color('#FA4224')"></li>
+			<li><input type="button"  onclick="change_color('#FFFFFF')" value="Erasor"></li>
 		  </ul>
 		</th>
+
 	  <tr/>
 
 	  <tr>
@@ -51,18 +49,26 @@
 		</th>
 
 		<th>
-		  <button onclick="new_slide();">New slide</button>
-		  <input type="file" id="myFile" multiple size="1" onchange="read_and_upload_file()">
-		  <button id="replayButton" onclick="startReplay()" >Replay</button>
 		  <button id="recordButton" onclick="startRecord()" >Start Record</button>
 		  <a href="" id="a" download>click here to download your file</a>
 		  <button onclick="download( 'mouseMovements.txt', 'text/plain')">Stop Record</button>
+		  <button id="exportPDF" onclick="exportPDF()" >Export As PDF</button>
 		</th>
-		
-		<th></th>
+
+		<th>
+			<input type="file" id="myFile" multiple size="1" onchange="read_and_upload_file()">
+			<button id="replayButton" onclick="startReplay()" >Replay</button>
+		</th>
 	  <tr/>
 	</table>
-	<p id="debug_elm"></p>
+	<div style="position: absolute; bottom: 0; right: 0; width: 500px; text-align:right;">
+		<p> Made with &#60;3 by Lakshya and Archit </p>
+	  </div>
+
+
+	  <!--<p id="debug_elm"></p>  -->
+
 	<script src="init.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
   </body>
 </html>
