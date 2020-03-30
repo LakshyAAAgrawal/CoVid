@@ -6,6 +6,7 @@ function init(){
 	t0 = performance.now();
 	savedMovements =  new Array();
 	savedt0 = performance.now();
+	$('#upload_slides').on('change', handleFileSelect);
 }
 
 init();

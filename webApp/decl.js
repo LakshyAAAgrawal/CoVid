@@ -9,6 +9,14 @@ var t0;
 var savedMovements;
 var savedt0;
 var globalID;
+var debug_count = 0;
+var to_record = true;
+
+function record_to_movements(entry){
+	if(to_record){
+		movements.push(entry);
+	}
+}
 
 function new_slide(){
 	var slide_id = "slide" + (num_slides++);
@@ -31,7 +39,7 @@ function new_slide(){
 	$("#slides_list").append(switch_btn);
 
 	var t1 = performance.now();
-	movements.push({
+	record_to_movements({
 		t: t1 - t0,
 		action: "create_slide"
 	});
@@ -44,6 +52,10 @@ function set_current(slide_id){
 		current_canvas.removeEventListener('mousemove', updateMousePos, false);
 		current_canvas.removeEventListener('mousedown', draw_start, false);	
 		current_canvas.removeEventListener('mouseup', draw_stop, false);
+
+		//current_canvas.removeEventListener('touchmove', updateMousePos, false);
+		//current_canvas.removeEventListener('touchstart', draw_start, false);	
+		//current_canvas.removeEventListener('touchend', draw_stop, false);
 	}
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
@@ -51,13 +63,17 @@ function set_current(slide_id){
 	current_canvas.addEventListener('mousedown', draw_start, false);	
 	current_canvas.addEventListener('mouseup', draw_stop, false);
 
+	//current_canvas.addEventListener('touchmove', updateMousePos, false);
+	//current_canvas.addEventListener('touchstart', draw_start, false);	
+	//current_canvas.addEventListener('touchend', draw_stop, false);
+
 	var t1 = performance.now();
-	movements.push({
+	record_to_movements({
 		t: t1 - t0,
 		action: "change_slide",
 		action_param: [slide_id]
 	});
-	
+	$('#debug_elm').text(mouse.x + " " + mouse.y);
 }
 
 var onPaint = function() {
@@ -68,7 +84,7 @@ var onPaint = function() {
     ctx.lineTo(mousex, mousey);
     ctx.stroke();
 	var move = {x: mousex, y: mouse.y, t:(t1-t0)};
-    movements.push(move);
+    record_to_movements(move);
 };
 
 var draw_stop = function() {
@@ -81,7 +97,7 @@ var draw_start = function(e) {
 	ctx.moveTo(mouse.x, mouse.y);
 	var t1 = performance.now();
 	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
-    movements.push(move);
+    record_to_movements(move);
 	current_canvas.addEventListener('mousemove', onPaint, false);
 };
 
@@ -89,6 +105,7 @@ function updateMousePos(evt) {
 	var rect = current_canvas.getBoundingClientRect();
     mouse.x = evt.clientX - rect.left;
     mouse.y = evt.clientY - rect.top;
+	$('#debug_elm').text(mouse.x + " " + mouse.y);
 }
 
 function download(name, type) {
@@ -103,8 +120,6 @@ function download(name, type) {
 function updateMovement(){
     var curmove = savedMovements.shift();
 	var ctx = current_canvas.getContext('2d');
-    //console.log("mm");
-    console.log(curmove);
     if ('s' in curmove){
 		//mouseSimulate(curmov.x,curmov.y,"mousedown")
 		ctx.beginPath();
@@ -150,7 +165,6 @@ function read_and_upload_file(){
 				var fr = new FileReader();
 				fr.onload = function(e) {
 					savedMovements = JSON.parse( e.target.result );
-					console.log(savedMovements);
 				};
 				fr.readAsText(filee);
 			}
@@ -165,4 +179,34 @@ function read_and_upload_file(){
 		}
     }
     document.getElementById("demo").innerHTML = txt;
+}
+
+function handleFileSelect(evt) {
+    var files = evt.target.files;	
+    // Loop through the FileList and render image files as thumbnails.
+    for (var i = 0, f; f = files[i]; i++) {
+		
+		// Only process image files.
+		if (!f.type.match('image.*')) {
+			continue;
+		}
+		
+		var reader = new FileReader();
+		
+		// Closure to capture the file information.
+		reader.addEventListener("load", function(e) {
+			var image = new Image();
+			image.src = e.target.result;
+			image.onload = function(){
+				var tmp = to_record;
+				to_record = false;
+				new_slide_id = new_slide();
+				to_record = tmp;
+				canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, 800, 600);
+			}
+		}, false);
+		
+		// Read in the image file as a data URL.
+		reader.readAsDataURL(f);
+    }
 }
