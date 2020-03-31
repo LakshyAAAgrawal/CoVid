@@ -3,6 +3,8 @@
   <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+	<script src="dist/jszip.min.js"></script>
+	<script src="dist/FileSaver.js"></script>
 	<script src="decl.js"></script>
     <link rel="stylesheet" href="styles.css">
   </head>
@@ -16,8 +18,8 @@
 		  <ul>
 			<li><button id="recordButton" onclick="change_slide(1)" >Next Slide</button></li>
 			<li><button id="recordButton" onclick="change_slide(-1)" >Previous Slide</button></li>
-		  </ul>
-		  <div class="bscrollable">
+		  </ol>
+		  <div class="scrollable">
 			<ol id="slides_list">
 			</ol>
 			<button onclick="new_slide();">Add New slide</button> <br>
@@ -50,8 +52,7 @@
 
 		<th>
 		  <button id="recordButton" onclick="startRecord()" >Start Record</button>
-		  <a href="" id="a" download>click here to download your file</a>
-		  <button onclick="download( 'mouseMovements.txt', 'text/plain')">Stop Record</button>
+		  <button onclick="stop_record()">Stop Record</button>
 		  <button id="exportPDF" onclick="exportPDF()" >Export As PDF</button>
 		</th>
 
@@ -59,6 +60,8 @@
 			<input type="file" id="myFile" multiple size="1" onchange="read_and_upload_file()">
 			<button id="controlButton" onclick="" ></button>
 		</th>
+
+		<th></th>
 	  <tr/>
 	</table>
 	<div style="position: absolute; bottom: 0; right: 0; width: 500px; text-align:right;">
