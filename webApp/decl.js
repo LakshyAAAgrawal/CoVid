@@ -27,7 +27,11 @@ function startRecord(){
 
 	navigator.mediaDevices.getUserMedia({ audio: true })
 		.then(stream => {
-			mediaRecorder = new MediaRecorder(stream);
+			var options = {
+				audioBitsPerSecond : 32000,
+				mimeType : 'audio/ogg'
+			  }
+			mediaRecorder = new MediaRecorder(stream, options);
 			mediaRecorder.start();
 
 			const audioChunks = [];
@@ -47,7 +51,7 @@ function download(audioBlob) {
 	var zip = new JSZip();
 	var mouseBlob = getMouseBlob();
 	zip.file("MouseMovements.txt",mouseBlob);
-	zip.file("Audio.mp3", audioBlob);
+	zip.file("Audio.ogg", audioBlob);
 	zip.generateAsync({type:"blob"})
 	.then(function(content) {
 		saveAs(content, "LectureContent.zip");
