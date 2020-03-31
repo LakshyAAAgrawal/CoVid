@@ -13,8 +13,9 @@ var debug_count = 0;
 var to_record = true;
 var canvas_height = 700;
 var canvas_width = 1000;
-
-
+var delay = 0;
+var pauseTime = 0
+var ifpaused = false;
 
 function record_to_movements(entry){
 	if(to_record){
@@ -208,20 +209,47 @@ function updateMovement(){
     }
 }
 
-function startReplay(){
-	savedt0 = performance.now();
+function pause(){
+	ifpaused = true;
+	pauseTime = performance.now();
+	var button = document.getElementById("controlButton");
+	button.onclick = unpause;
+	button.innerHTML = 'UnPause';
+}
+
+function unpause(){
+	delay +=  performance.now() - pauseTime;
+	ifpaused = false;
+	var button = document.getElementById("controlButton");
+	button.onclick = pause;
+	button.innerHTML = "Pause";
 	globalID = requestAnimationFrame(replay);
 }
 
+function startReplay(){
+	savedt0 = performance.now();
+	var button = document.getElementById("controlButton");
+	button.onclick = pause;
+	button.innerHTML = "Pause";
+	globalID = requestAnimationFrame(replay);
+
+}
+
 function replay(){
-    if(savedMovements.length>0){
+    if(savedMovements.length>0 && ifpaused == false){
 		var currentT = performance.now();
-		var temp = currentT - savedt0;
+		var temp = currentT - savedt0 - delay;
 		if (savedMovements[0].t < temp){
 			updateMovement();
 		}
 		globalID = requestAnimationFrame(replay);
-    }
+	}
+
+	if(savedMovements.length == 0  ){
+		var button = document.getElementById("controlButton");
+		button.onclick = replay;
+		button.innerHTML = "Recording ended";
+	}
 }
 
 function read_and_upload_file(){
@@ -232,6 +260,9 @@ function read_and_upload_file(){
 			txt = "Select one or more files.";
 		} else {
 			for (var i = 0; x.files.length; i++) {
+				var button = document.getElementById("controlButton");
+				button.onclick = startReplay;
+				button.innerHTML = "Replay";
 				var filee = x.files[i];
 				var fr = new FileReader();
 				fr.onload = function(e) {
@@ -239,6 +270,8 @@ function read_and_upload_file(){
 				};
 				fr.readAsText(filee);
 			}
+
+
 		}
     }
     else {
