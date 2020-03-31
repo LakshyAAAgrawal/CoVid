@@ -21,15 +21,6 @@ function record_to_movements(entry){
 	}
 }
 
-function download_file(name, type, data){
-    var a = document.getElementById("a");
-    var toStore = JSON.stringify(movements);
-    a.style.display = "block";
-    var file = new Blob([toStore], {type: type});
-    a.href = URL.createObjectURL(file);
-    a.download = name;
-}
-
 function startRecord(){
 	t0 = performance.now();
 	movements = new Array();
@@ -38,28 +29,41 @@ function startRecord(){
 		.then(stream => {
 			mediaRecorder = new MediaRecorder(stream);
 			mediaRecorder.start();
-			
+
 			const audioChunks = [];
 			mediaRecorder.addEventListener("dataavailable", event => {
 				audioChunks.push(event.data);
 			});
-			
+
 			mediaRecorder.addEventListener("stop", () => {
 				const audioBlob = new Blob(audioChunks);
-				const audioUrl = URL.createObjectURL(audioBlob);
-				const audio = new Audio(audioUrl);
-				recordedAudio.src = audioUrl;
-				recordedAudio.controls = true;
-				recordedAudio.autoplay = true;
+				download(audioBlob);
 			});
 		});
+}
+
+function download(audioBlob) {
+
+	var zip = new JSZip();
+	var mouseBlob = getMouseBlob();
+	zip.file("MouseMovements.txt",mouseBlob);
+	zip.file("Audio.mp3", audioBlob);
+	zip.generateAsync({type:"blob"})
+	.then(function(content) {
+		saveAs(content, "LectureContent.zip");
+	});
+}
+
+function getMouseBlob(){
+	var toStore = JSON.stringify(movements);
+	var file = new Blob([toStore], {type: 'text/plain'});
+	return file
 }
 
 function stop_record(){
 	if(mediaRecorder){
 		mediaRecorder.stop();
 	}
-	download('mouseMovements.txt', 'text/plain');
 }
 
 function new_slide(){
@@ -109,10 +113,10 @@ function set_current(slide_id){
 		current_canvas.removeEventListener('touchend', prevent_touch_move_callback, false);
 		current_canvas.removeEventListener('touchcancel', prevent_touch_move_callback, false);
 	}
-	
+
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
-	
+
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
@@ -133,7 +137,7 @@ function set_current(slide_id){
 		action: "change_slide",
 		action_param: [slide_id]
 	});
-	
+
 	$('#debug_elm').text(mouse.x + " " + mouse.y);
 }
 
@@ -212,15 +216,6 @@ function updateTouchPos(evt) {
 	mouse.y = evt.changedTouches[0].clientY - rect.top;
 }
 
-function download(name, type) {
-    var a = document.getElementById("a");
-    var toStore = JSON.stringify(movements);
-    a.style.display = "block";
-    var file = new Blob([toStore], {type: type});
-    a.href = URL.createObjectURL(file);
-    a.download = name;
-}
-
 function updateMovement(){
     var curmove = savedMovements.shift();
 	var ctx = current_canvas.getContext('2d');
@@ -289,7 +284,7 @@ function read_and_upload_file(){
 }
 
 function handleFileSelect(evt) {
-    var files = evt.target.files;	
+    var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
 		if (f.type.match('image.*')) {
 			var reader = new FileReader();
@@ -332,7 +327,7 @@ function handleFileSelect(evt) {
 					}
 				}, function (reason) {
 				});
-				
+
 			}, false);
 			reader.readAsDataURL(f);
 		}

@@ -3,6 +3,8 @@
   <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+	<script src="dist/jszip.min.js"></script>
+	<script src="dist/FileSaver.js"></script>
 	<script src="decl.js"></script>
     <link rel="stylesheet" href="styles.css">
   </head>
@@ -14,7 +16,7 @@
 		<th>CoVid</th>
 		<th></th>
 	  <tr/>
-	  
+
 	  <tr>
 		<th>
 		  Slides
@@ -55,11 +57,10 @@
 		  <input type="file" id="myFile" multiple size="1" onchange="read_and_upload_file()">
 		  <button id="replayButton" onclick="startReplay()" >Replay</button>
 		  <button id="recordButton" onclick="startRecord()" >Start Record</button>
-		  <a href="" id="a" download>click here to download your file</a>
 		  <button onclick="stop_record()">Stop Record</button>
 		  <audio id="recordedAudio"></audio>
 		</th>
-		
+
 		<th></th>
 	  <tr/>
 	</table>
