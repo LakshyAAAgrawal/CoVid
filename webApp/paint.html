@@ -22,7 +22,7 @@
 			<li><button id="recordButton" onclick="change_slide(1)" >Next Slide</button></li>
 			<li><button id="recordButton" onclick="change_slide(-1)" >Previous Slide</button></li>
 		  </ol>
-		  <div class="bscrollable">
+		  <div class="scrollable">
 			<ol id="slides_list">
 			</ol>
 		  </div>
@@ -56,7 +56,8 @@
 		  <button id="replayButton" onclick="startReplay()" >Replay</button>
 		  <button id="recordButton" onclick="startRecord()" >Start Record</button>
 		  <a href="" id="a" download>click here to download your file</a>
-		  <button onclick="download( 'mouseMovements.txt', 'text/plain')">Stop Record</button>
+		  <button onclick="stop_record()">Stop Record</button>
+		  <audio id="recordedAudio"></audio>
 		</th>
 		
 		<th></th>

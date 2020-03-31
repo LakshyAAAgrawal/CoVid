@@ -13,6 +13,7 @@ var debug_count = 0;
 var to_record = true;
 var canvas_height = 600;
 var canvas_width = 800;
+var mediaRecorder;
 
 function record_to_movements(entry){
 	if(to_record){
@@ -20,9 +21,45 @@ function record_to_movements(entry){
 	}
 }
 
+function download_file(name, type, data){
+    var a = document.getElementById("a");
+    var toStore = JSON.stringify(movements);
+    a.style.display = "block";
+    var file = new Blob([toStore], {type: type});
+    a.href = URL.createObjectURL(file);
+    a.download = name;
+}
+
 function startRecord(){
 	t0 = performance.now();
 	movements = new Array();
+
+	navigator.mediaDevices.getUserMedia({ audio: true })
+		.then(stream => {
+			mediaRecorder = new MediaRecorder(stream);
+			mediaRecorder.start();
+			
+			const audioChunks = [];
+			mediaRecorder.addEventListener("dataavailable", event => {
+				audioChunks.push(event.data);
+			});
+			
+			mediaRecorder.addEventListener("stop", () => {
+				const audioBlob = new Blob(audioChunks);
+				const audioUrl = URL.createObjectURL(audioBlob);
+				const audio = new Audio(audioUrl);
+				recordedAudio.src = audioURL;
+				recordedAudio.controls = true;
+				recordedAudio.autoplay = true;
+			});
+		});
+}
+
+function stop_record(){
+	if(mediaRecorder){
+		mediaRecorder.stop();
+	}
+	download('mouseMovements.txt', 'text/plain');
 }
 
 function new_slide(){
@@ -72,12 +109,13 @@ function set_current(slide_id){
 		current_canvas.removeEventListener('touchend', prevent_touch_move_callback, false);
 		current_canvas.removeEventListener('touchcancel', prevent_touch_move_callback, false);
 	}
+	
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
+	
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
-
 
 	current_canvas.addEventListener('touchmove', updateTouchPos, false);
 	current_canvas.addEventListener('touchstart', draw_start_touch, false);
@@ -176,7 +214,7 @@ function updateTouchPos(evt) {
 
 function download(name, type) {
     var a = document.getElementById("a");
-    var toStore = JSON.stringify( movements );
+    var toStore = JSON.stringify(movements);
     a.style.display = "block";
     var file = new Blob([toStore], {type: type});
     a.href = URL.createObjectURL(file);
