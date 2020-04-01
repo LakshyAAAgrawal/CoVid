@@ -296,70 +296,77 @@ function replay(){
 }
 
 function readUploadedfile(evt){
-
-	console.log("jjs");
-	console.log("jjadfsas");
 	var button = document.getElementById("controlButton");
 	button.onclick = startReplay;
 	button.innerHTML = "Replay";
 	var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
-		console.log("kkkk");
+		//console.log("kkkk");
         handleFile(files[i]);
     }
 }
 
-// to specify only one file
-
-
 /*
-
-function readSoundFile(filee){
+function readSoundFile(file){
 	const reader = new FileReader();
 	reader.onload = function(e) {
 		const srcUrl = e.target.result;
 
 	};
-	reader.readAsDataURL(filee);
+	reader.readAsDataURL(file);
 }
 */
+
 function handleFile(f) {
-
 	JSZip.loadAsync(f)                                   // 1) read the Blob
-	.then(function(zip) {
-		zip.forEach(function (relativePath, zipEntry) {  // 2) print entries
-			console.log(zipEntry);
-			if(relativePath == "MouseMovements.txt"){
-				console.log(zipEntry.async("string"));
-				zipEntry.async("string")
-				.then(function (mousemovement) {
-					savedMovements = JSON.parse( mousemovement);
-				})
-
-			}
-			else{
-
-				//AUdio file here
-				/*
-				zipEntry.async("base64")
-				.then(function(zip) {
-					var audio = document.getElementById('audio');
-					var blob=new Blob([zip], {type : 'audio/ogg'});
-
-					readSoundFile(blob);
-
-					var blobUrl = URL.createObjectURL(blob);
-					console.log(blobUrl);
-
-
-				})
-
-				*/
-			}
+		.then(function(zip) {
+			zip.forEach(function (relativePath, zipEntry) {  // 2) print entries
+				console.log(zipEntry);
+				if(relativePath == "MouseMovements.txt"){
+					console.log(zipEntry.async("string"));
+					zipEntry.async("string")
+						.then(function (mousemovement) {
+							savedMovements = JSON.parse(mousemovement);
+						})
+					
+				}
+				else{
+					zipEntry.async("base64")
+						.then(function(zip) {
+							var clipName = "clipn";
+							var clipContainer = document.createElement('article');
+							var clipLabel = document.createElement('p');
+							savedAudio = document.createElement('audio');
+							var deleteButton = document.createElement('button');
+							var soundClips = document.querySelector('.sound-clips');
+							
+							clipContainer.classList.add('clip');
+							savedAudio.setAttribute('controls', '');
+							deleteButton.innerHTML = "Delete";
+							clipLabel.innerHTML = clipName;
+							console.log("base64 of audio:");
+							console.log(zip);
+							clipContainer.appendChild(savedAudio);
+							clipContainer.appendChild(clipLabel);
+							clipContainer.appendChild(deleteButton);
+							soundClips.appendChild(clipContainer);
+							
+							savedAudio.controls = true;
+							var blob = b64toBlob(zip, 'audio/ogg; codecs=opus');//new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+							chunks = [];
+							var audioURL = URL.createObjectURL(blob);
+							savedAudio.src = audioURL;
+							console.log("recorder stopped");
+							deleteButton.onclick = function(e) {
+								evtTgt = e.target;
+								evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
+							}
+						})
+				}
+			});
+		}, function (e) {
+			console.log(e.message);
 		});
-	}, function (e) {
-		console.log(e.message);
-	});
 }
 
 function handleFileSelect(evt) {
@@ -426,4 +433,24 @@ function exportPDF(){
 	}
 
 	doc.save('sample-file.pdf');
+}
+
+const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
+  const byteCharacters = atob(b64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  const blob = new Blob(byteArrays, {type: contentType});
+  return blob;
 }
