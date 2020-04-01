@@ -255,6 +255,7 @@ function pause(){
 	ifpaused = true;
 	pauseTime = performance.now();
 	var button = document.getElementById("controlButton");
+	savedAudio.pause();
 	button.onclick = unpause;
 	button.innerHTML = 'UnPause';
 }
@@ -263,6 +264,7 @@ function unpause(){
 	delay +=  performance.now() - pauseTime;
 	ifpaused = false;
 	var button = document.getElementById("controlButton");
+	savedAudio.play();
 	button.onclick = pause;
 	button.innerHTML = "Pause";
 	globalID = requestAnimationFrame(replay);
@@ -306,17 +308,6 @@ function readUploadedfile(evt){
     }
 }
 
-/*
-function readSoundFile(file){
-	const reader = new FileReader();
-	reader.onload = function(e) {
-		const srcUrl = e.target.result;
-
-	};
-	reader.readAsDataURL(file);
-}
-*/
-
 function handleFile(f) {
 	JSZip.loadAsync(f)                                   // 1) read the Blob
 		.then(function(zip) {
@@ -352,7 +343,7 @@ function handleFile(f) {
 							soundClips.appendChild(clipContainer);
 							
 							savedAudio.controls = true;
-							var blob = b64toBlob(zip, 'audio/ogg; codecs=opus');//new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+							var blob = b64toBlob(zip, 'audio/ogg; codecs=opus');
 							chunks = [];
 							var audioURL = URL.createObjectURL(blob);
 							savedAudio.src = audioURL;
