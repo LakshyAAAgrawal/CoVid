@@ -16,6 +16,7 @@ var canvas_width = 800;
 var delay = 0;
 var pauseTime = 0
 var ifpaused = false;
+var mediaRecorder;
 
 function record_to_movements(entry){
 	if(to_record){
@@ -26,6 +27,50 @@ function record_to_movements(entry){
 function startRecord(){
 	t0 = performance.now();
 	movements = new Array();
+
+	navigator.mediaDevices.getUserMedia({ audio: true })
+		.then(stream => {
+			var options = {
+				audioBitsPerSecond : 32000,
+				mimeType : 'audio/ogg'
+			  }
+			mediaRecorder = new MediaRecorder(stream, options);
+			mediaRecorder.start();
+
+			const audioChunks = [];
+			mediaRecorder.addEventListener("dataavailable", event => {
+				audioChunks.push(event.data);
+			});
+
+			mediaRecorder.addEventListener("stop", () => {
+				const audioBlob = new Blob(audioChunks);
+				download(audioBlob);
+			});
+		});
+}
+
+function download(audioBlob) {
+
+	var zip = new JSZip();
+	var mouseBlob = getMouseBlob();
+	zip.file("MouseMovements.txt",mouseBlob);
+	zip.file("Audio.ogg", audioBlob);
+	zip.generateAsync({type:"blob"})
+	.then(function(content) {
+		saveAs(content, "LectureContent.zip");
+	});
+}
+
+function getMouseBlob(){
+	var toStore = JSON.stringify(movements);
+	var file = new Blob([toStore], {type: 'text/plain'});
+	return file
+}
+
+function stop_record(){
+	if(mediaRecorder){
+		mediaRecorder.stop();
+	}
 }
 
 function new_slide(){
@@ -75,12 +120,13 @@ function set_current(slide_id){
 		current_canvas.removeEventListener('touchend', prevent_touch_move_callback, false);
 		current_canvas.removeEventListener('touchcancel', prevent_touch_move_callback, false);
 	}
+
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
+
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
-
 
 	current_canvas.addEventListener('touchmove', updateTouchPos, false);
 	current_canvas.addEventListener('touchstart', draw_start_touch, false);
@@ -175,15 +221,6 @@ function updateTouchPos(evt) {
 	var rect = current_canvas.getBoundingClientRect();
     mouse.x = evt.changedTouches[0].clientX - rect.left;
 	mouse.y = evt.changedTouches[0].clientY - rect.top;
-}
-
-function download(name, type) {
-    var a = document.getElementById("a");
-    var toStore = JSON.stringify( movements );
-    a.style.display = "block";
-    var file = new Blob([toStore], {type: type});
-    a.href = URL.createObjectURL(file);
-    a.download = name;
 }
 
 function updateMovement(){
