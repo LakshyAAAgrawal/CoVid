@@ -56,7 +56,11 @@ function download(audioBlob) {
 	var mouseBlob = getMouseBlob();
 	zip.file("MouseMovements.txt",mouseBlob);
 	zip.file("Audio.ogg", audioBlob);
-	zip.generateAsync({type:"blob"})
+	zip.generateAsync({type:"blob",
+					   compression: "DEFLATE",
+    				   compressionOptions: {
+                            level: 9
+    				   }})
 	.then(function(content) {
 		saveAs(content, "LectureContent.zip");
 	});
@@ -305,19 +309,20 @@ function readUploadedfile(evt){
     }
 }
 
+// to specify only one file
+
+
+/*
+
 function readSoundFile(filee){
 	const reader = new FileReader();
 	reader.onload = function(e) {
 		const srcUrl = e.target.result;
-		$("#source").attr("src", srcUrl);
-		$("#audio")[0].pause();
-		$("#audio")[0].load();//suspends and restores all audio element
-		$("#audio")[0].oncanplaythrough =  $("#audio")[0].play();
-		console.log(srcUrl);
+
 	};
 	reader.readAsDataURL(filee);
 }
-
+*/
 function handleFile(f) {
 
 	JSZip.loadAsync(f)                                   // 1) read the Blob
@@ -333,17 +338,23 @@ function handleFile(f) {
 
 			}
 			else{
+
+				//AUdio file here
+				/*
 				zipEntry.async("base64")
 				.then(function(zip) {
+					var audio = document.getElementById('audio');
 					var blob=new Blob([zip], {type : 'audio/ogg'});
+
 					readSoundFile(blob);
 
 					var blobUrl = URL.createObjectURL(blob);
 					console.log(blobUrl);
 
+
 				})
 
-
+				*/
 			}
 		});
 	}, function (e) {
