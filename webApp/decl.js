@@ -50,8 +50,7 @@ function startRecord(){
 		});
 }
 
-function download(audioBlob) {
-
+function download(audioBlob){
 	var zip = new JSZip();
 	var mouseBlob = getMouseBlob();
 	zip.file("MouseMovements.txt",mouseBlob);
@@ -153,7 +152,7 @@ function set_current(slide_id){
 	$('#debug_elm').text(mouse.x + " " + mouse.y);
 }
 
-function prevent_touch_move_callback(e) {
+function prevent_touch_move_callback(e){
 	if (e.target == current_canvas) {
 		e.preventDefault();
 	}
@@ -176,7 +175,7 @@ function change_color(color){
 	current_canvas.getContext('2d').strokeStyle = color;
 }
 
-var onPaint = function() {
+var onPaint = function(){
 	var mousex = mouse.x;
     var mousey = mouse.y;
 	var t1 = performance.now();
@@ -188,12 +187,12 @@ var onPaint = function() {
     record_to_movements(move);
 };
 
-var draw_stop = function() {
+var draw_stop = function(){
 	current_canvas.removeEventListener('mousemove', onPaint, false);
 	current_canvas.removeEventListener('touchmove', onPaint, false);
 };
 
-var draw_start = function(e) {
+var draw_start = function(e){
 	var ctx = current_canvas.getContext('2d');
 	ctx.beginPath();
 	ctx.moveTo(mouse.x, mouse.y);
@@ -204,7 +203,7 @@ var draw_start = function(e) {
 
 };
 
-var draw_start_touch = function(e) {
+var draw_start_touch = function(e){
 	var ctx = current_canvas.getContext('2d');
 	updateTouchPos(e);
 	ctx.beginPath();
@@ -215,14 +214,14 @@ var draw_start_touch = function(e) {
 	current_canvas.addEventListener('touchmove', onPaint, false);
 };
 
-function updateMousePos(evt) {
+function updateMousePos(evt){
 	var rect = current_canvas.getBoundingClientRect();
     mouse.x = evt.clientX - rect.left;
     mouse.y = evt.clientY - rect.top;
 	$('#debug_elm').text(mouse.x + " " + mouse.y);
 }
 
-function updateTouchPos(evt) {
+function updateTouchPos(evt){
 	var rect = current_canvas.getBoundingClientRect();
     mouse.x = evt.changedTouches[0].clientX - rect.left;
 	mouse.y = evt.changedTouches[0].clientY - rect.top;
@@ -303,25 +302,21 @@ function readUploadedfile(evt){
 	button.innerHTML = "Replay";
 	var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
-		//console.log("kkkk");
         handleFile(files[i]);
     }
 }
 
-function handleFile(f) {
-	JSZip.loadAsync(f)                                   // 1) read the Blob
+function handleFile(f){
+	JSZip.loadAsync(f)
 		.then(function(zip) {
-			zip.forEach(function (relativePath, zipEntry) {  // 2) print entries
-				console.log(zipEntry);
+			zip.forEach(function (relativePath, zipEntry) {
 				if(relativePath == "MouseMovements.txt"){
-					console.log(zipEntry.async("string"));
 					zipEntry.async("string")
 						.then(function (mousemovement) {
 							savedMovements = JSON.parse(mousemovement);
 						})
 					
-				}
-				else{
+				}else{
 					zipEntry.async("base64")
 						.then(function(zip) {
 							var clipName = "clipn";
@@ -335,8 +330,6 @@ function handleFile(f) {
 							savedAudio.setAttribute('controls', '');
 							deleteButton.innerHTML = "Delete";
 							clipLabel.innerHTML = clipName;
-							console.log("base64 of audio:");
-							console.log(zip);
 							clipContainer.appendChild(savedAudio);
 							clipContainer.appendChild(clipLabel);
 							clipContainer.appendChild(deleteButton);
@@ -347,7 +340,6 @@ function handleFile(f) {
 							chunks = [];
 							var audioURL = URL.createObjectURL(blob);
 							savedAudio.src = audioURL;
-							console.log("recorder stopped");
 							deleteButton.onclick = function(e) {
 								evtTgt = e.target;
 								evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
@@ -360,8 +352,7 @@ function handleFile(f) {
 		});
 }
 
-function handleFileSelect(evt) {
-	console.log("sdal");
+function handleFileSelect(evt){
     var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
 		if (f.type.match('image.*')) {
@@ -416,9 +407,7 @@ function exportPDF(){
 	var doc = new jsPDF('l');
 
 	for(var index in canvas_dict){
-		var imgData = canvas_dict[index].toDataURL(
-			'image/png');
-		console.log("er");
+		var imgData = canvas_dict[index].toDataURL('image/png');
 		doc.addImage(imgData, 'PNG', 0, 0);
 		doc.addPage();
 	}
