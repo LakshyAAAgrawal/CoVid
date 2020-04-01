@@ -6,7 +6,7 @@
 }
 
 .scrollable {
-    width: 300px;
+    width: 200px;
     height: 400px;
     overflow-x: scroll;
 }

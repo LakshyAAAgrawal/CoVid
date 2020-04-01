@@ -11,8 +11,8 @@ var savedt0;
 var globalID;
 var debug_count = 0;
 var to_record = true;
-var canvas_height = 700;
-var canvas_width = 1000;
+var canvas_height = 600;
+var canvas_width = 800;
 var delay = 0;
 var pauseTime = 0
 var ifpaused = false;
