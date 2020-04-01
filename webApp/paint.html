@@ -58,8 +58,11 @@
 		</th>
 
 		<th>
-			<input type="file" id="myFile" multiple size="1" onchange="read_and_upload_file()">
+			<input type="file" id="upload_recording" name="files[]" multiple />
 			<button id="controlButton" onclick="" ></button>
+			<audio id="audio" controls>
+				<source id="source" src="" type="audio/ogg"/>
+			</audio>
 		</th>
 
 		<th></th>
@@ -74,7 +77,7 @@
 		<th></th>
 	  </tr>
 	</table>
-	
+
 	<script src="init.js"></script>
   </body>
 </html>

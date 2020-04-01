@@ -7,12 +7,13 @@ var num_slides = 0;
 var movements = new Array();
 var t0;
 var savedMovements;
+var savedAudio;
 var savedt0;
 var globalID;
 var debug_count = 0;
 var to_record = true;
-var canvas_height = 600;
-var canvas_width = 800;
+var canvas_height = 700;
+var canvas_width = 1000;
 var delay = 0;
 var pauseTime = 0
 var ifpaused = false;
@@ -43,7 +44,7 @@ function startRecord(){
 			});
 
 			mediaRecorder.addEventListener("stop", () => {
-				const audioBlob = new Blob(audioChunks);
+				const audioBlob = new Blob(audioChunks, {type : 'audio/ogg'});
 				download(audioBlob);
 			});
 		});
@@ -268,6 +269,7 @@ function startReplay(){
 	var button = document.getElementById("controlButton");
 	button.onclick = pause;
 	button.innerHTML = "Pause";
+	savedAudio.play();
 	globalID = requestAnimationFrame(replay);
 
 }
@@ -289,40 +291,68 @@ function replay(){
 	}
 }
 
-function read_and_upload_file(){
-    var x = document.getElementById("myFile");
-    var txt = "";
-    if ('files' in x) {
-		if (x.files.length == 0) {
-			txt = "Select one or more files.";
-		} else {
-			for (var i = 0; x.files.length; i++) {
-				var button = document.getElementById("controlButton");
-				button.onclick = startReplay;
-				button.innerHTML = "Replay";
-				var filee = x.files[i];
-				var fr = new FileReader();
-				fr.onload = function(e) {
-					savedMovements = JSON.parse( e.target.result );
-				};
-				fr.readAsText(filee);
+function readUploadedfile(evt){
+
+	console.log("jjs");
+	console.log("jjadfsas");
+	var button = document.getElementById("controlButton");
+	button.onclick = startReplay;
+	button.innerHTML = "Replay";
+	var files = evt.target.files;
+    for (var i = 0, f; f = files[i]; i++) {
+		console.log("kkkk");
+        handleFile(files[i]);
+    }
+}
+
+function readSoundFile(filee){
+	const reader = new FileReader();
+	reader.onload = function(e) {
+		const srcUrl = e.target.result;
+		$("#source").attr("src", srcUrl);
+		$("#audio")[0].pause();
+		$("#audio")[0].load();//suspends and restores all audio element
+		$("#audio")[0].oncanplaythrough =  $("#audio")[0].play();
+		console.log(srcUrl);
+	};
+	reader.readAsDataURL(filee);
+}
+
+function handleFile(f) {
+
+	JSZip.loadAsync(f)                                   // 1) read the Blob
+	.then(function(zip) {
+		zip.forEach(function (relativePath, zipEntry) {  // 2) print entries
+			console.log(zipEntry);
+			if(relativePath == "MouseMovements.txt"){
+				console.log(zipEntry.async("string"));
+				zipEntry.async("string")
+				.then(function (mousemovement) {
+					savedMovements = JSON.parse( mousemovement);
+				})
+
 			}
+			else{
+				zipEntry.async("base64")
+				.then(function(zip) {
+					var blob=new Blob([zip], {type : 'audio/ogg'});
+					readSoundFile(blob);
+
+					var blobUrl = URL.createObjectURL(blob);
+					console.log(blobUrl);
+
+				})
 
 
-		}
-    }
-    else {
-		if (x.value == "") {
-			txt += "Select one or more files.";
-		} else {
-			txt += "The files property is not supported by your browser!";
-			txt  += "<br>The path of the selected file: " + x.value; // If the browser does not support the files property, it will return the path of the selected file instead.
-		}
-    }
-    document.getElementById("demo").innerHTML = txt;
+			}
+		});
+	}, function (e) {
+		console.log(e.message);
+	});
 }
 
 function handleFileSelect(evt) {
+	console.log("sdal");
     var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
 		if (f.type.match('image.*')) {
