@@ -17,13 +17,13 @@
 		<th>
 		  Slides
 		  <ul>
-			<li><button id="recordButton" onclick="change_slide(1)" >Next Slide</button></li>
-			<li><button id="recordButton" onclick="change_slide(-1)" >Previous Slide</button></li>
+			<li><button id="nextSlide" onclick="change_slide(1)" >Next Slide</button></li>
+			<li><button id="previousSlide" onclick="change_slide(-1)" >Previous Slide</button></li>
 		  </ul>
 		  <div class="scrollable">
 			<ol id="slides_list">
 			</ol>
-			<button onclick="new_slide();"><img src="res/images/add.png" style="width:50px;height:60px;"></button> <br>
+			<button onclick="new_slide();">Add New Slide</button> <br>
 		  </div>
 		</th>
 
@@ -53,7 +53,6 @@
 
 		<th>
 		  <button id="recordButton" onclick="startRecord()" >Start Record</button>
-		  <button onclick="stop_record()">Stop Record</button>
 		  <button id="exportPDF" onclick="exportPDF()" >Export As PDF</button>
 		</th>
 

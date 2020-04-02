@@ -30,6 +30,10 @@ function startRecord(){
 	t0 = performance.now();
 	movements = new Array();
 
+	var button = document.getElementById("recordButton");
+	button.innerHTML = "Stop Recording";
+	button.onclick = stop_record;
+
 	navigator.mediaDevices.getUserMedia({ audio: true })
 		.then(stream => {
 			var options = {
@@ -73,6 +77,10 @@ function getMouseBlob(){
 }
 
 function stop_record(){
+	var button = document.getElementById("recordButton");
+	button.innerHTML = "Start Recording";
+	button.onclick = startRecord;
+
 	if(mediaRecorder){
 		mediaRecorder.stop();
 	}
@@ -257,7 +265,7 @@ function pause(){
 	var button = document.getElementById("controlButton");
 	savedAudio.pause();
 	button.onclick = unpause;
-	button.innerHTML = 'UnPause';
+	button.innerHTML = 'Play';
 }
 
 function unpause(){
@@ -276,6 +284,13 @@ function startReplay(){
 	button.onclick = pause;
 	button.innerHTML = "Pause";
 	savedAudio.play();
+
+	savedAudio.addEventListener("ended", function() {
+		var button = document.getElementById("controlButton");
+		button.onclick = "";
+		button.innerHTML = "Recording finished";
+	});
+
 	globalID = requestAnimationFrame(replay);
 
 }
@@ -288,12 +303,6 @@ function replay(){
 			updateMovement();
 		}
 		globalID = requestAnimationFrame(replay);
-	}
-
-	if(savedMovements.length == 0  ){
-		var button = document.getElementById("controlButton");
-		button.onclick = replay;
-		button.innerHTML = "Recording ended";
 	}
 }
 
