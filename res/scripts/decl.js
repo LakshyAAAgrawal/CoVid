@@ -19,6 +19,7 @@ var pauseTime = 0
 var ifpaused = false;
 var mediaRecorder;
 
+
 function record_to_movements(entry){
 	if(to_record){
 		movements.push(entry);
@@ -33,7 +34,7 @@ function startRecord(){
 		.then(stream => {
 			var options = {
 				audioBitsPerSecond : 32000,
-				mimeType : 'audio/ogg'
+				mimeType : 'audio/webm;codecs=opus'
 			  }
 			mediaRecorder = new MediaRecorder(stream, options);
 			mediaRecorder.start();
@@ -44,7 +45,7 @@ function startRecord(){
 			});
 
 			mediaRecorder.addEventListener("stop", () => {
-				const audioBlob = new Blob(audioChunks, {type : 'audio/ogg'});
+				const audioBlob = new Blob(audioChunks, {type : 'audio/webm'});
 				download(audioBlob);
 			});
 		});
@@ -54,7 +55,7 @@ function download(audioBlob){
 	var zip = new JSZip();
 	var mouseBlob = getMouseBlob();
 	zip.file("MouseMovements.txt",mouseBlob);
-	zip.file("Audio.ogg", audioBlob);
+	zip.file("Audio.webm", audioBlob);
 	zip.generateAsync({type:"blob",
 					   compression: "DEFLATE",
     				   compressionOptions: {
@@ -315,7 +316,7 @@ function handleFile(f){
 						.then(function (mousemovement) {
 							savedMovements = JSON.parse(mousemovement);
 						})
-					
+
 				}else{
 					zipEntry.async("base64")
 						.then(function(zip) {
@@ -325,7 +326,7 @@ function handleFile(f){
 							savedAudio = document.createElement('audio');
 							var deleteButton = document.createElement('button');
 							var soundClips = document.querySelector('.sound-clips');
-							
+
 							clipContainer.classList.add('clip');
 							savedAudio.setAttribute('controls', '');
 							deleteButton.innerHTML = "Delete";
@@ -334,9 +335,9 @@ function handleFile(f){
 							clipContainer.appendChild(clipLabel);
 							clipContainer.appendChild(deleteButton);
 							soundClips.appendChild(clipContainer);
-							
+
 							savedAudio.controls = true;
-							var blob = b64toBlob(zip, 'audio/ogg; codecs=opus');
+							var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
 							chunks = [];
 							var audioURL = URL.createObjectURL(blob);
 							savedAudio.src = audioURL;
