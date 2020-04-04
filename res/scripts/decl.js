@@ -18,7 +18,8 @@ var delay = 0;
 var pauseTime = 0
 var ifpaused = false;
 var mediaRecorder;
-
+var recordTimeCounter;
+var seconds = 0, minutes = 0, hours = 0; // For record Timer
 
 function record_to_movements(entry){
 	if(to_record){
@@ -29,6 +30,10 @@ function record_to_movements(entry){
 function startRecord(){
 	t0 = performance.now();
 	movements = new Array();
+	startRecordingtimer();
+
+	seconds = 0; minutes = 0; hours = 0;
+	document.getElementById('recordingTime').style.display = "block";
 
 	var button = document.getElementById("recordButton");
 	button.innerHTML = "Stop Recording";
@@ -55,6 +60,19 @@ function startRecord(){
 		});
 }
 
+function stop_record(){
+	var button = document.getElementById("recordButton");
+	button.innerHTML = "Start Recording";
+	button.onclick = startRecord;
+
+	document.getElementById('recordingTime').style.display = "none";
+
+	clearTimeout(recordTimeCounter);
+	if(mediaRecorder){
+		mediaRecorder.stop();
+	}
+}
+
 function download(audioBlob){
 	var zip = new JSZip();
 	var mouseBlob = getMouseBlob();
@@ -76,15 +94,31 @@ function getMouseBlob(){
 	return file
 }
 
-function stop_record(){
-	var button = document.getElementById("recordButton");
-	button.innerHTML = "Start Recording";
-	button.onclick = startRecord;
 
-	if(mediaRecorder){
-		mediaRecorder.stop();
-	}
+
+///// Update time counter block
+//updateRecordTime updates the time counter when recording is on.
+function updateRecordTime() {
+    seconds++;
+    if (seconds >= 60) {
+        seconds = 0;
+        minutes++;
+        if (minutes >= 60) {
+            minutes = 0;
+            hours++;
+        }
+    }
+    recordingTime = document.getElementById('recordingTime'),
+    recordingTime.textContent = (hours ? (hours > 9 ? hours : "0" + hours) : "00") + ":" + (minutes ? (minutes > 9 ? minutes : "0" + minutes) : "00") + ":" + (seconds > 9 ? seconds : "0" + seconds);
+    startRecordingtimer();
 }
+
+function startRecordingtimer() {
+    recordTimeCounter = setTimeout(updateRecordTime, 1000);
+}
+////////
+
+
 
 function new_slide(){
 	var slide_id = (num_slides++);
@@ -310,6 +344,8 @@ function readUploadedfile(evt){
 	var button = document.getElementById("controlButton");
 	button.onclick = startReplay;
 	button.innerHTML = "Replay";
+	button.style.display = 'block';
+
 	var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
         handleFile(files[i]);
@@ -329,31 +365,22 @@ function handleFile(f){
 				}else{
 					zipEntry.async("base64")
 						.then(function(zip) {
-							var clipName = "clipn";
+
 							var clipContainer = document.createElement('article');
-							var clipLabel = document.createElement('p');
 							savedAudio = document.createElement('audio');
 							var deleteButton = document.createElement('button');
 							var soundClips = document.querySelector('.sound-clips');
 
 							clipContainer.classList.add('clip');
 							savedAudio.setAttribute('controls', '');
-							deleteButton.innerHTML = "Delete";
-							clipLabel.innerHTML = clipName;
 							clipContainer.appendChild(savedAudio);
-							clipContainer.appendChild(clipLabel);
-							clipContainer.appendChild(deleteButton);
 							soundClips.appendChild(clipContainer);
 
-							savedAudio.controls = true;
+							savedAudio.controls = false;
 							var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
 							chunks = [];
 							var audioURL = URL.createObjectURL(blob);
 							savedAudio.src = audioURL;
-							deleteButton.onclick = function(e) {
-								evtTgt = e.target;
-								evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
-							}
 						})
 				}
 			});

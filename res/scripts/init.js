@@ -8,6 +8,7 @@ function init(){
 	savedt0 = performance.now();
 	$('#upload_slides').on('change', handleFileSelect);
 	$('#upload_recording').on('change', readUploadedfile);
+	document.getElementById('recordingTime').style.display = "none";
 }
 
 init();

@@ -48,23 +48,25 @@
 
 	  <tr>
 		<th>
-		  <input type="file" id="upload_slides" name="files[]" multiple />
+		  <input type="file" id="upload_slides" name="files[]" accept="image/*,.pdf" />
 		</th>
 
 		<th>
 		  <button id="recordButton" onclick="startRecord()" >Start Record</button>
 		  <button id="exportPDF" onclick="exportPDF()" >Export As PDF</button>
+		  <p id="recordingTime"><time>00:00:00</time></p>
 		</th>
 
 		<th>
-			<input type="file" id="upload_recording" name="files[]" multiple />
-			<button id="controlButton" onclick="" ></button>
+			<input type="file" id="upload_recording" name="files[]" />
 
+				<button id="controlButton" class ="controlbutton"  onclick="" ></button>
 
+			<!--
 			<audio id="audio" controls>
 				<source id="source" src="" type="audio/ogg"/>
 			</audio>
-
+			-->
 
 			<section class="sound-clips">
 

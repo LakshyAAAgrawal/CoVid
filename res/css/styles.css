@@ -10,3 +10,7 @@
     height: 400px;
     overflow-x: scroll;
 }
+
+.controlbutton{
+    display: none;
+}
