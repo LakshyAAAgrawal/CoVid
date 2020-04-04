@@ -20,6 +20,9 @@ var ifpaused = false;
 var mediaRecorder;
 var recordTimeCounter;
 var seconds = 0, minutes = 0, hours = 0; // For record Timer
+var isSoundRecorded = true;
+var isSoundinPlayback = false;   // true when sound is present is uploaded file
+
 
 function record_to_movements(entry){
 	if(to_record){
@@ -41,6 +44,9 @@ function startRecord(){
 
 	navigator.mediaDevices.getUserMedia({ audio: true })
 		.then(stream => {
+			isSoundRecorded = true;
+			document.getElementById('issoundRecorded').innerText = "";
+
 			var options = {
 				audioBitsPerSecond : 32000,
 				mimeType : 'audio/webm;codecs=opus'
@@ -57,7 +63,12 @@ function startRecord(){
 				const audioBlob = new Blob(audioChunks, {type : 'audio/webm'});
 				download(audioBlob);
 			});
-		});
+		})
+		.catch(function(err) {
+			document.getElementById('issoundRecorded').innerText = "Sound Not recorded";
+			isSoundRecorded = false;
+		  });
+
 }
 
 function stop_record(){
@@ -66,18 +77,28 @@ function stop_record(){
 	button.onclick = startRecord;
 
 	document.getElementById('recordingTime').style.display = "none";
-
 	clearTimeout(recordTimeCounter);
-	if(mediaRecorder){
+
+	document.getElementById('issoundRecorded').innerText = "";
+
+	if(isSoundRecorded && mediaRecorder){
 		mediaRecorder.stop();
+	}
+	else{
+		download();
 	}
 }
 
+// Make a zip and download
 function download(audioBlob){
 	var zip = new JSZip();
 	var mouseBlob = getMouseBlob();
 	zip.file("MouseMovements.txt",mouseBlob);
-	zip.file("Audio.webm", audioBlob);
+
+	if(typeof audioBlob !== "undefined"){
+		zip.file("Audio.webm", audioBlob);
+	}
+
 	zip.generateAsync({type:"blob",
 					   compression: "DEFLATE",
     				   compressionOptions: {
@@ -344,7 +365,7 @@ function pause(){
 	ifpaused = true;
 	pauseTime = performance.now();
 	var button = document.getElementById("controlButton");
-	savedAudio.pause();
+	if (isSoundinPlayback) {savedAudio.pause();}
 	button.onclick = unpause;
 	button.innerHTML = 'Play';
 }
@@ -353,7 +374,7 @@ function unpause(){
 	delay +=  performance.now() - pauseTime;
 	ifpaused = false;
 	var button = document.getElementById("controlButton");
-	savedAudio.play();
+	if (isSoundinPlayback) {savedAudio.play();}
 	button.onclick = pause;
 	button.innerHTML = "Pause";
 	globalID = requestAnimationFrame(replay);
@@ -364,13 +385,17 @@ function startReplay(){
 	var button = document.getElementById("controlButton");
 	button.onclick = pause;
 	button.innerHTML = "Pause";
-	savedAudio.play();
-
-	savedAudio.addEventListener("ended", function() {
-		var button = document.getElementById("controlButton");
-		button.onclick = "";
-		button.innerHTML = "Recording finished";
-	});
+	if (isSoundinPlayback) {
+		savedAudio.play();
+		savedAudio.addEventListener("ended", function() {
+			var button = document.getElementById("controlButton");
+			button.onclick = "";
+			button.innerHTML = "Recording finished";
+		});
+	}
+	else{
+		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
+	}
 
 	globalID = requestAnimationFrame(replay);
 
@@ -384,6 +409,14 @@ function replay(){
 			updateMovement();
 		}
 		globalID = requestAnimationFrame(replay);
+	}
+	else if(savedMovements.length == 0 && isSoundinPlayback == false){
+		var button = document.getElementById("controlButton");
+		button.onclick = "";
+		button.innerHTML = "Recording finished";
+
+		document.getElementById("issoundpresent").innerHTML = "";
+
 	}
 }
 
@@ -447,6 +480,7 @@ function handleFile(f){
 							chunks = [];
 							var audioURL = URL.createObjectURL(blob);
 							savedAudio.src = audioURL;
+							isSoundinPlayback = true;
 						})
 				}
 			});
