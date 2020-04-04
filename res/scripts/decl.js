@@ -151,7 +151,14 @@ function new_slide(){
 }
 
 function set_current(slide_id){
+	var strokeStyle = '#00CC99';
+	var lineWidth = 3;
 	if(typeof current_canvas !== 'undefined'){
+
+		ctx = current_canvas.getContext('2d');   /// To carry forward the same linewidth and
+		strokeStyle = ctx.strokeStyle;			 /// color to next slide when the slide is changed
+		lineWidth = ctx.lineWidth
+
 		current_canvas.style.display = 'none';
 		current_canvas.removeEventListener('mousemove', updateMousePos, false);
 		current_canvas.removeEventListener('mousedown', draw_start, false);
@@ -170,6 +177,10 @@ function set_current(slide_id){
 
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
+
+	ctx = current_canvas.getContext('2d');
+	ctx.lineWidth = lineWidth;
+	ctx.strokeStyle = strokeStyle;
 
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
@@ -243,7 +254,6 @@ var draw_start = function(e){
 	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
     record_to_movements(move);
 	current_canvas.addEventListener('mousemove', onPaint, false);
-
 };
 
 var draw_start_touch = function(e){
@@ -278,7 +288,7 @@ function updateMovement(){
 		ctx.beginPath();
 		ctx.moveTo(curmove.x, curmove.y);
     }else if('action' in curmove &&
-			 curmove.action == "create_slide"){
+			curmove.action == "create_slide"){
 		new_slide();
 	}else if('action' in curmove &&
 			 curmove.action == "change_slide"){
@@ -286,8 +296,10 @@ function updateMovement(){
 	}else if('action' in curmove &&
 			 curmove.action == "change_color"){
 		change_color.apply(this, curmove.action_param);
+	}else if('action' in curmove &&
+			 curmove.action == "changePointerWidth"){
+		changePointerWidth.apply(this, curmove.action_param);
 	}else{
-		//mouseSimulate(curmov.x,curmov.y,"mousemove")
 		ctx.lineTo(curmove.x, curmove.y);
 		ctx.stroke();
     }
@@ -470,4 +482,16 @@ const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
 
   const blob = new Blob(byteArrays, {type: contentType});
   return blob;
+}
+
+function changePointerWidth(width){
+	var t1 = performance.now();
+	record_to_movements({
+		t: t1 - t0,
+		action: "changePointerWidth",
+		action_param: [width]
+	});
+
+	var ctx = current_canvas.getContext('2d');
+	ctx.lineWidth = width;
 }
