@@ -138,7 +138,6 @@ function startRecordingtimer() {
 ////////
 
 
-
 function new_slide(){
 	var slide_id = (num_slides++);
 	var new_canvas = $('<canvas/>', {"style":"border: solid 5pt blue", "width":canvas_width, "height":canvas_height, "id":slide_id}).get(0);
@@ -419,7 +418,6 @@ function parse_saved_json_to_usable_format(mousemovement){
 	return movementList;
 }
 
-
 function handleFile(f){
 	JSZip.loadAsync(f)
 		.then(function(zip) {
@@ -550,4 +548,9 @@ function changePointerWidth(width){
 
 	var ctx = current_canvas.getContext('2d');
 	ctx.lineWidth = width;
+}
+
+//// To pop up notification when tab is closed
+window.onbeforeunload = function() {
+	return "Are you Sure?"
 }
