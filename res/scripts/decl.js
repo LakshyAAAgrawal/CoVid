@@ -88,13 +88,32 @@ function download(audioBlob){
 	});
 }
 
+/// To convert the movement array to store all valuse of one key in a list
+/// PS mera sar dard ho raha hai
+function convert_json_to_compressed_form(movementList){
+	var t = new Array();
+	var action = new Array();
+	var action_param = new Array();
+
+	movementList.forEach(function (item) {
+		t.push(item['t']);
+		action.push(item['action']);
+		action_param.push(item['action_param']);
+	  });
+
+	var movementTosave = {};
+	movementTosave['version'] = '1.0';
+	movementTosave['t'] = t;
+	movementTosave['action'] = action;
+	movementTosave['action_param'] = action_param;
+	return JSON.stringify(movementTosave);
+}
+
 function getMouseBlob(){
-	var toStore = JSON.stringify(movements);
+	var toStore = convert_json_to_compressed_form(movements);
 	var file = new Blob([toStore], {type: 'text/plain'});
 	return file
 }
-
-
 
 ///// Update time counter block
 //updateRecordTime updates the time counter when recording is on.
@@ -229,17 +248,25 @@ function change_color(color){
 	current_canvas.getContext('2d').strokeStyle = color;
 }
 
+// Called everytime there is a mouse movement and there is a need to draw
 var onPaint = function(){
-	var mousex = mouse.x;
-    var mousey = mouse.y;
+
 	var t1 = performance.now();
 	var ctx = current_canvas.getContext('2d');
-	ctx.lineTo(mousex, mousey);
+	drawPointer(mouse.x, mouse.y);
 
-    ctx.stroke();
-	var move = {x: mousex, y: mouse.y, t:(t1-t0)};
-    record_to_movements(move);
+    record_to_movements({
+		t:(t1-t0),
+		action:'m', /// Stands for move
+		action_param: [mouse.x,mouse.y]
+	});
 };
+
+//Make a line from initial position to current position of mouse
+function drawPointer(xCoordinate, yCoordinate){
+	ctx.lineTo(xCoordinate, yCoordinate);
+	ctx.stroke();
+}
 
 var draw_stop = function(){
 	current_canvas.removeEventListener('mousemove', onPaint, false);
@@ -248,22 +275,29 @@ var draw_stop = function(){
 
 var draw_start = function(e){
 	var ctx = current_canvas.getContext('2d');
-	ctx.beginPath();
-	ctx.moveTo(mouse.x, mouse.y);
+
+	movePointer(mouse.x, mouse.y);
+
 	var t1 = performance.now();
-	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
-    record_to_movements(move);
+    record_to_movements({
+		t:(t1-t0),
+		action:'movePointer',
+		action_param: [mouse.x,mouse.y]
+	});
 	current_canvas.addEventListener('mousemove', onPaint, false);
 };
 
 var draw_start_touch = function(e){
 	var ctx = current_canvas.getContext('2d');
 	updateTouchPos(e);
-	ctx.beginPath();
-	ctx.moveTo(mouse.x, mouse.y);
+
+	movePointer(mouse.x, mouse.y);
 	var t1 = performance.now();
-	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
-	movements.push(move);
+    record_to_movements({
+		t:(t1-t0),
+		action:'movePointer',
+		action_param: [mouse.x,mouse.y]
+	});
 	current_canvas.addEventListener('touchmove', onPaint, false);
 };
 
@@ -271,7 +305,6 @@ function updateMousePos(evt){
 	var rect = current_canvas.getBoundingClientRect();
     mouse.x = evt.clientX - rect.left;
     mouse.y = evt.clientY - rect.top;
-	$('#debug_elm').text(mouse.x + " " + mouse.y);
 }
 
 function updateTouchPos(evt){
@@ -280,13 +313,17 @@ function updateTouchPos(evt){
 	mouse.y = evt.changedTouches[0].clientY - rect.top;
 }
 
+function movePointer(xCoordinate, yCoordinate){
+	ctx.beginPath();
+	ctx.moveTo(xCoordinate, yCoordinate);
+}
+
+// Get a movement and simulate a particular movement
 function updateMovement(){
     var curmove = savedMovements.shift();
 	var ctx = current_canvas.getContext('2d');
-    if ('s' in curmove){
-		//mouseSimulate(curmov.x,curmov.y,"mousedown")
-		ctx.beginPath();
-		ctx.moveTo(curmove.x, curmove.y);
+    if (curmove.action == "movePointer"){
+		movePointer.apply(this, curmove.action_param)
     }else if('action' in curmove &&
 			curmove.action == "create_slide"){
 		new_slide();
@@ -300,8 +337,7 @@ function updateMovement(){
 			 curmove.action == "changePointerWidth"){
 		changePointerWidth.apply(this, curmove.action_param);
 	}else{
-		ctx.lineTo(curmove.x, curmove.y);
-		ctx.stroke();
+		drawPointer.apply(this, curmove.action_param)
     }
 }
 
@@ -364,6 +400,26 @@ function readUploadedfile(evt){
     }
 }
 
+///// Unpack JSON into the desired format
+function parse_saved_json_to_usable_format(mousemovement){
+	movementJSON = JSON.parse(mousemovement)
+	var movementList = new Array();
+	var tList = movementJSON['t'];
+	var actionList = movementJSON['action'];
+	var actionParamList = movementJSON['action_param'];
+
+	while(tList.length>0){
+		var curmove = {}
+		curmove['t'] = tList.shift();
+		curmove['action'] = actionList.shift();
+		curmove['action_param'] = actionParamList.shift();
+		movementList.push(curmove)
+	}
+
+	return movementList;
+}
+
+
 function handleFile(f){
 	JSZip.loadAsync(f)
 		.then(function(zip) {
@@ -371,7 +427,7 @@ function handleFile(f){
 				if(relativePath == "MouseMovements.txt"){
 					zipEntry.async("string")
 						.then(function (mousemovement) {
-							savedMovements = JSON.parse(mousemovement);
+							savedMovements = parse_saved_json_to_usable_format(mousemovement);
 						})
 
 				}else{
