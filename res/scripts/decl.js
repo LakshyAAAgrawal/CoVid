@@ -11,7 +11,7 @@ var savedAudio;
 var savedt0;
 var globalID;
 var debug_count = 0;
-var to_record = true;
+var to_record = false;
 var canvas_height = 700;
 var canvas_width = 1000;
 var delay = 0;
@@ -32,11 +32,13 @@ function record_to_movements(entry){
 
 function startRecord(){
 	t0 = performance.now();
+	to_record = true;
 	movements = new Array();
 	startRecordingtimer();
 
 	seconds = 0; minutes = 0; hours = 0;
 	document.getElementById('recordingTime').style.display = "block";
+	document.getElementById('pauserecordButton').style.display = "block";
 
 	var button = document.getElementById("recordButton");
 	button.innerHTML = "Stop Recording";
@@ -76,6 +78,10 @@ function stop_record(){
 	button.innerHTML = "Start Recording";
 	button.onclick = startRecord;
 
+	document.getElementById('pauserecordButton').style.display = "none";
+
+	to_record = false;
+
 	document.getElementById('recordingTime').style.display = "none";
 	clearTimeout(recordTimeCounter);
 
@@ -88,6 +94,28 @@ function stop_record(){
 		download();
 	}
 }
+
+function pauseRecording(){
+	var button = document.getElementById("pauserecordButton");
+	button.innerHTML = "Resume Recording";
+	button.onclick = resumeRecording;
+
+	clearTimeout(recordTimeCounter);
+	to_record = false;
+	mediaRecorder.pause();
+}
+
+function resumeRecording(){
+
+	var button = document.getElementById("pauserecordButton");
+	button.innerHTML = "Pause Recording";
+	button.onclick = pauseRecording;
+
+	startRecordingtimer();
+	to_record = true;
+	mediaRecorder.resume();
+}
+
 
 // Make a zip and download
 function download(audioBlob){

@@ -15,6 +15,11 @@
     display: none;
 }
 
+.pauserecordButton{
+  display: none;
+}
+
+
 .slidecontainer {
     width: 100%; /* Width of the outside container */
   }
