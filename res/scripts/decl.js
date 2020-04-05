@@ -106,7 +106,6 @@ function pauseRecording(){
 }
 
 function resumeRecording(){
-
 	var button = document.getElementById("pauserecordButton");
 	button.innerHTML = "Pause Recording";
 	button.onclick = pauseRecording;
@@ -194,6 +193,9 @@ function new_slide(){
 	$("#canvas_list").append(new_canvas);
 	new_canvas.style.display = 'none';
 	var ctx = new_canvas.getContext('2d');
+
+	//ctx.globalCompositeOperation = "source-over";
+
 	ctx.canvas.width = canvas_width;
 	ctx.canvas.height = canvas_height;
 	ctx.lineWidth = 3;
@@ -217,6 +219,7 @@ function new_slide(){
 	return slide_id;
 }
 
+//Sets the current slide to a specific slide id
 function set_current(slide_id){
 	var strokeStyle = '#00CC99';
 	var lineWidth = 3;
@@ -262,6 +265,8 @@ function set_current(slide_id){
 	current_canvas.addEventListener('touchstart', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchend', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchcancel', prevent_touch_move_callback, false);
+
+	setPen();
 
 	var t1 = performance.now();
 	record_to_movements({
@@ -530,7 +535,8 @@ function handleFileSelect(evt){
 					to_record = false;
 					new_slide_id = new_slide();
 					to_record = tmp;
-					canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, canvas_width, canvas_height);
+					//canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, canvas_width, canvas_height);
+					document.getElementById(new_slide_id).style.backgroundImage = "url(" + image.src +")";
 				}
 			}, false);
 			reader.readAsDataURL(f);
@@ -546,7 +552,8 @@ function handleFileSelect(evt){
 						pdf.getPage(i).then(function(page) {
 							var scale = 1;
 							var unscaledViewport = page.getViewport({scale: scale});
-							canvas = canvas_dict[new_slide()];
+							var new_slide_id = new_slide();
+							var canvas = canvas_dict[new_slide_id];
 							var r_scale = Math.min((canvas_height / unscaledViewport.height), (canvas_width / unscaledViewport.width));
 							var viewport = page.getViewport({scale : r_scale});
 							var context = canvas.getContext('2d');
@@ -555,7 +562,13 @@ function handleFileSelect(evt){
 								viewport: viewport
 							};
 							var renderTask = page.render(renderContext);
+
 							renderTask.promise.then(function () {
+								/// Convert canvas to image and put it in background to make it non erasable by eraser
+								var imgData = canvas.toDataURL('image/png');
+								canvas.getContext('2d').clearRect(0, 0, canvas_width, canvas_height);
+								console.log("Ram");
+								document.getElementById(new_slide_id).style.backgroundImage = "url(" + imgData +")";
 							});
 						});
 					}
@@ -570,14 +583,14 @@ function handleFileSelect(evt){
 
 function exportPDF(){
 	var doc = new jsPDF('l');
-
 	for(var index in canvas_dict){
-		var imgData = canvas_dict[index].toDataURL('image/png');
-		doc.addImage(imgData, 'PNG', 0, 0);
+
+		var slideImage = canvas_dict[index].toDataURL('image/png');
+		doc.addImage(slideImage, 'PNG', 0, 0);
 		doc.addPage();
 	}
 
-	doc.save('sample-file.pdf');
+	doc.save('LecturePDF.pdf');
 }
 
 const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
@@ -615,4 +628,12 @@ function changePointerWidth(width){
 //// To pop up notification when tab is closed
 window.onbeforeunload = function() {
 	return "Are you Sure?"
+}
+
+function setEraser(){
+	current_canvas.getContext("2d").globalCompositeOperation = "destination-out";
+}
+
+function setPen(){
+	current_canvas.getContext("2d").globalCompositeOperation = "source-over";
 }
