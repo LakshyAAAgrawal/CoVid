@@ -120,6 +120,7 @@ body {
 .mode_toggle{
 	display: flex;
 	height: 69px;
+	margin-right: 40px;
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;

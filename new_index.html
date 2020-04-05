@@ -29,17 +29,19 @@
 
 	<div class="bottom_bar">
 	  <div class="mode_toggle">
-		<img onclick="change_mode('view')" src="res/images/view-mode-button.svg" class="mode_toggle_color_button"></img>
-		<img onclick="change_mode('rec')" src="res/images/record-mode-button.svg" class="mode_toggle_color_button"></img>
+		<img id="view_mode_button" onclick="change_mode('view')" src="res/images/view-mode-button.svg" class="mode_toggle_color_button"></img>
+		<img id="rec_mode_button" onclick="change_mode('rec')" src="res/images/record-mode-button.svg" class="mode_toggle_color_button"></img>
 	  </div>
 
 	  <div class="import_doc rec view">
-		<input type="file" id="upload_slides" name="files[]" multiple />
+		<input type="file" id="upload_slides" name="files[]" src="res/images/import_base_pdf.svg" style="display:none;" multiple />
+		<img onclick="$('#upload_slides').click();" src="res/images/import_base_pdf.svg" class="mode_toggle_color_button"></img>
 	  </div>
 
 	  <div class="replay_control view">
-		<input type="file" id="upload_recording" name="files[]" multiple />
-		<button id="controlButton" onclick="" ></button>
+		<input type="file" id="upload_recording" name="files[]" style="display:none;" multiple />
+		<img onclick="$('#upload_recording').click();" src="res/images/import_lecture_content.svg" class="mode_toggle_color_button"></img>
+		<button id="controlButton" onclick=""></button>
 		<audio id="audio" controls>
 		  <source id="source" src="" type="audio/ogg"/>
 		</audio>

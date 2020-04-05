@@ -10,7 +10,7 @@ function init(){
 	savedt0 = performance.now();
 	$('#upload_slides').on('change', handleFileSelect);
 	$('#upload_recording').on('change', readUploadedfile);
-	change_mode('view');
+	change_mode('rec');
 	$("#right_scroll_bar").css("height", $(window).height() - (side_bar_width * 3 + 10));
 	console.log($(window).height() - (side_bar_width * 3 + 10));
 }

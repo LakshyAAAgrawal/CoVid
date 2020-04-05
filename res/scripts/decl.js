@@ -36,12 +36,16 @@ function change_mode(target){
 		$(".rec").css("display", "none");
 		$(".view").css("display", "block");
 		current_mode = "view";
+		$("#view_mode_button").css("background", "white");
+		$("#rec_mode_button").css("background", "blue");
 	}else if(target === "rec"){
 		$(".view").css("display", "none");
 		$(".rec").css("display", "block");
 		$(".left_bar").css("display", "block");
 		$(".right_bar").css("display", "block");
 		current_mode = "rec";
+		$("#rec_mode_button").css("background", "white");
+		$("#view_mode_button").css("background", "blue");
 	}
 	reset_canvas_dimension();
 }
