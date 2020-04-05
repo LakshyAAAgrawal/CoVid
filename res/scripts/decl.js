@@ -12,15 +12,16 @@ var savedt0;
 var globalID;
 var debug_count = 0;
 var to_record = true;
-var canvas_height = 700;
-var canvas_width = 1000;
+var side_bar_width = 75;
+var canvas_height = 900;
+var canvas_width = 1600;
 var delay = 0;
-var pauseTime = 0
+var pauseTime = 0;
 var ifpaused = false;
 var mediaRecorder;
+var current_mode = "view";
 
 // Check save feature in chrome
-
 
 function record_to_movements(entry){
 	if(to_record){
@@ -28,10 +29,55 @@ function record_to_movements(entry){
 	}
 }
 
+function change_mode(target){
+	if(target === "view"){
+		$(".left_bar").css("display", "none");
+		$(".right_bar").css("display", "none");
+		$(".rec").css("display", "none");
+		$(".view").css("display", "block");
+		current_mode = "view";
+	}else if(target === "rec"){
+		$(".view").css("display", "none");
+		$(".rec").css("display", "block");
+		$(".left_bar").css("display", "block");
+		$(".right_bar").css("display", "block");
+		current_mode = "rec";
+	}
+	reset_canvas_dimension();
+}
+
+function reset_canvas_dimension(e){
+	var max_canvas_width = 0;
+	if(current_mode == "rec"){
+		max_canvas_width = $(window).width() - (2*side_bar_width + 10);
+	}else{
+		max_canvas_width = $(window).width() - 10;
+	}
+	var max_canvas_height = $(window).height() - (side_bar_width + 20);
+	var canvas_scale = Math.min((max_canvas_height / canvas_height), (max_canvas_width / canvas_width));
+	canvas_width = Math.floor(canvas_width * canvas_scale);
+	canvas_height = Math.floor(canvas_height * canvas_scale);
+	if(typeof current_canvas !== 'undefined'){
+		var img = new Image();
+		img.src = current_canvas.toDataURL();
+		img.onload = function(){
+			current_canvas.height = canvas_height;
+			current_canvas.width = canvas_width;
+			current_canvas.style.height = canvas_height.toString() + "px";
+			current_canvas.style.width = canvas_width.toString() + "px";
+			current_canvas.getContext('2d').drawImage(img, 0, 0, canvas_width, canvas_height);
+			var ctx = current_canvas.getContext('2d');
+			ctx.lineWidth = 3;
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+			ctx.strokeStyle = '#00CC99';
+		}
+	}
+}
+
 function startRecord(){
 	t0 = performance.now();
 	movements = new Array();
-
 	navigator.mediaDevices.getUserMedia({ audio: true })
 		.then(stream => {
 			var options = {
@@ -83,7 +129,8 @@ function stop_record(){
 
 function new_slide(){
 	var slide_id = (num_slides++);
-	var new_canvas = $('<canvas/>', {"style":"border: solid 5pt blue", "width":canvas_width, "height":canvas_height, "id":slide_id}).get(0);
+	var new_canvas = $('<canvas/>', {"style":"border: solid 5pt #F10C45", "width":canvas_width, "height":canvas_height, "id":slide_id}).get(0);
+	$(new_canvas).css("margin", "auto");
 	canvas_dict[slide_id] = new_canvas;
 	$("#canvas_list").append(new_canvas);
 	new_canvas.style.display = 'none';
@@ -131,7 +178,7 @@ function set_current(slide_id){
 
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
-
+	reset_canvas_dimension();
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
@@ -146,6 +193,8 @@ function set_current(slide_id){
 	current_canvas.addEventListener('touchend', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchcancel', prevent_touch_move_callback, false);
 
+	
+	
 	var t1 = performance.now();
 	record_to_movements({
 		t: t1 - t0,
