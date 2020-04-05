@@ -2,7 +2,6 @@
   --vertical-bar-width: 75px;
 }
 
-
 #a { display: none; }
 
 body {
@@ -16,13 +15,25 @@ body {
 	height: 100%;
 }
 
+.canvas_instance{
+	border-style: inset;
+	border: solid 5pt #F10C45;
+	box-shadow: 0 15px 15px rgba(0, 0, 0, 0.3); 
+}
+
 .view{}
 .rec{}
 .title{}
 .slide_controls{}
 .slide_buttons{}
 .slide_list{}
-.draw_controls{}
+.draw_controls{
+	width: 75px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
 #canvas_container{
 	position: absolute;
 	left: 75px;
@@ -37,11 +48,16 @@ body {
 .color_button{
 	width: 64px;
 	height: 64px;
-	margin: auto;
+	margin: 5px;
 	border-radius: 50%;
 	border: 20px;
 	border-color: white;
+	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.3); 
 }
+.color_button:hover{
+	filter: brightness(110%);
+}
+
 .left_bar{
 	position: fixed;
 	left: 0;
@@ -49,10 +65,24 @@ body {
 	bottom: 0;
 	width: var(--vertical-bar-width);
 	background: #31668A;
+	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.3); 
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+}
+
+.mode_toggle_color_button{
+	width: 45px;
+	height: 45px;
+	margin: 5px;
+	padding: 10px;
+	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.3); 
+	background: #2B547A;
+}
+
+.mode_toggle_color_button:hover{
+	filter: brightness(110%);
 }
 
 .bottom_bar{
@@ -81,4 +111,17 @@ body {
 .button{
 	width: 100%;
 	color: cyan;
+}
+
+.button:hover{
+	filter: brightness(200%);
+}
+
+.mode_toggle{
+	display: flex;
+	height: 69px;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	border-radius: 35px;
 }

@@ -129,7 +129,7 @@ function stop_record(){
 
 function new_slide(){
 	var slide_id = (num_slides++);
-	var new_canvas = $('<canvas/>', {"style":"border: solid 5pt #F10C45", "width":canvas_width, "height":canvas_height, "id":slide_id}).get(0);
+	var new_canvas = $('<canvas/>', {"width":canvas_width, "height":canvas_height, "id":slide_id, "class":"canvas_instance"}).get(0);
 	$(new_canvas).css("margin", "auto");
 	canvas_dict[slide_id] = new_canvas;
 	$("#canvas_list").append(new_canvas);

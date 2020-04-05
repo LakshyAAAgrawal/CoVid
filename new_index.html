@@ -9,7 +9,7 @@
 	<script src="res/scripts/decl.js"></script>
 
 	<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="res/css/styles.css">
+	<link rel="stylesheet" href="res/css/styles.css">
   </head>
 
   <body>
@@ -22,15 +22,15 @@
 		<input class="color_button" type="button" style="background-color:#475F94"  onclick="change_color('#475F94')">
 		<input class="color_button" type="button" style="background-color:#FDDC5C"  onclick="change_color('#FDDC5C')">
 		<input class="color_button" type="button" style="background-color:#FA4224"  onclick="change_color('#FA4224')">
-		<input class="color_button" type="button" onclick="change_color('#FFFFFF')" value="Erasor">
+		<input class="color_button" type="button" onclick="change_color('#FFFFFF')" value="Eraser">
 	  </div>
 	  
 	</div>
 
 	<div class="bottom_bar">
 	  <div class="mode_toggle">
-		<button onclick="change_mode('view')">View Mode</button>
-		<button onclick="change_mode('rec')">Record Mode</button>
+		<img onclick="change_mode('view')" src="res/images/view-mode-button.svg" class="mode_toggle_color_button"></img>
+		<img onclick="change_mode('rec')" src="res/images/record-mode-button.svg" class="mode_toggle_color_button"></img>
 	  </div>
 
 	  <div class="import_doc rec view">
@@ -49,12 +49,13 @@
 
 	  
 	  <div class="export_doc rec">
-		<button id="exportPDF" onclick="exportPDF()" >Export As PDF</button>
+		<img id="exportPDF" onclick="exportPDF()" src="res/images/export_pdf.png" class="mode_toggle_color_button"></img>
 	  </div>
 	  
 	  <div class="record_control rec">
-		<button id="recordButton" onclick="startRecord()" >Start Record</button>
-		<button onclick="stop_record()">Stop Record</button>	  
+		<img id="recordButton" onclick="startRecord()" src="res/images/start_recording.svg" class="mode_toggle_color_button"></img>
+		<img id="recordButton" onclick="stop_record()" src="res/images/stop_recording.svg" class="mode_toggle_color_button"></img>
+		<!-- <button onclick="stop_record()">Stop Record</button> -->
 	  </div>
 	  
 	</div>
