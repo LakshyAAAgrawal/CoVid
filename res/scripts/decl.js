@@ -22,6 +22,18 @@ var recordTimeCounter;
 var seconds = 0, minutes = 0, hours = 0; // For record Timer
 var isSoundRecorded = true;
 var isSoundinPlayback = false;   // true when sound is present is uploaded file
+var isTimelineUpdated;
+
+var duration;
+var pButton; // play button
+var playhead ; // playhead
+var timeline; // timeline
+// timeline width adjusted for playhead
+var timelineWidth;
+// Boolean value so that audio position is updated only when the playhead is released
+var onplayhead = false;
+
+
 
 
 function record_to_movements(entry){
@@ -394,46 +406,7 @@ function updateMovement(){
     }
 }
 
-function pause(){
-	ifpaused = true;
-	pauseTime = performance.now();
-	var button = document.getElementById("controlButton");
-	if (isSoundinPlayback) {savedAudio.pause();}
-	button.onclick = unpause;
-	button.innerHTML = 'Play';
-}
-
-function unpause(){
-	delay +=  performance.now() - pauseTime;
-	ifpaused = false;
-	var button = document.getElementById("controlButton");
-	if (isSoundinPlayback) {savedAudio.play();}
-	button.onclick = pause;
-	button.innerHTML = "Pause";
-	globalID = requestAnimationFrame(replay);
-}
-
-function startReplay(){
-	savedt0 = performance.now();
-	var button = document.getElementById("controlButton");
-	button.onclick = pause;
-	button.innerHTML = "Pause";
-	if (isSoundinPlayback) {
-		savedAudio.play();
-		savedAudio.addEventListener("ended", function() {
-			var button = document.getElementById("controlButton");
-			button.onclick = "";
-			button.innerHTML = "Recording finished";
-		});
-	}
-	else{
-		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
-	}
-
-	globalID = requestAnimationFrame(replay);
-
-}
-
+// To replay the mouse movements
 function replay(){
     if(savedMovements.length>0 && ifpaused == false){
 		var currentT = performance.now();
@@ -452,6 +425,7 @@ function replay(){
 
 	}
 }
+////////////////////////////////////////////////
 
 function readUploadedfile(evt){
 	var button = document.getElementById("controlButton");
@@ -498,22 +472,21 @@ function handleFile(f){
 					zipEntry.async("base64")
 						.then(function(zip) {
 
-							var clipContainer = document.createElement('article');
-							savedAudio = document.createElement('audio');
-							var deleteButton = document.createElement('button');
-							var soundClips = document.querySelector('.sound-clips');
-
-							clipContainer.classList.add('clip');
-							savedAudio.setAttribute('controls', '');
-							clipContainer.appendChild(savedAudio);
-							soundClips.appendChild(clipContainer);
-
-							savedAudio.controls = false;
 							var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
 							chunks = [];
 							var audioURL = URL.createObjectURL(blob);
-							savedAudio.src = audioURL;
 							isSoundinPlayback = true;
+
+							savedAudio = new Howl({
+								src: [audioURL],
+								format: ['webm']
+							  });
+
+							savedAudio.once('load', function(){
+								duration = savedAudio._duration;
+								document.getElementById('audioplayer').style.display = "block";
+							  });
+
 						})
 				}
 			});
@@ -567,7 +540,6 @@ function handleFileSelect(evt){
 								/// Convert canvas to image and put it in background to make it non erasable by eraser
 								var imgData = canvas.toDataURL('image/png');
 								canvas.getContext('2d').clearRect(0, 0, canvas_width, canvas_height);
-								console.log("Ram");
 								document.getElementById(new_slide_id).style.backgroundImage = "url(" + imgData +")";
 							});
 						});
@@ -584,12 +556,10 @@ function handleFileSelect(evt){
 function exportPDF(){
 	var doc = new jsPDF('l');
 	for(var index in canvas_dict){
-
 		var slideImage = canvas_dict[index].toDataURL('image/png');
 		doc.addImage(slideImage, 'PNG', 0, 0);
 		doc.addPage();
 	}
-
 	doc.save('LecturePDF.pdf');
 }
 
@@ -627,7 +597,7 @@ function changePointerWidth(width){
 
 //// To pop up notification when tab is closed
 window.onbeforeunload = function() {
-	return "Are you Sure?"
+	return "Eak bar punha vichar kare"
 }
 
 function setEraser(){
@@ -636,4 +606,125 @@ function setEraser(){
 
 function setPen(){
 	current_canvas.getContext("2d").globalCompositeOperation = "source-over";
+}
+
+// mouseDown EventListener
+function timelineSelected() {
+    onplayhead = true;
+    window.addEventListener('mousemove', moveplayhead, true);
+}
+
+// mouseUp EventListener
+// getting input from all mouse clicks
+function timelineDeselected(event) {
+    if (onplayhead == true) {
+        moveplayhead(event);
+        window.removeEventListener('mousemove', moveplayhead, true);
+        savedAudio.seek(duration*clickPercent(event));
+
+    }
+    onplayhead = false;
+}
+// mousemove EventListener
+// Moves playhead as user drags
+function moveplayhead(event) {
+    var newMargLeft = event.clientX - getPosition(timeline);
+    if (newMargLeft >= 0 && newMargLeft <= timelineWidth) {
+        playhead.style.marginLeft = newMargLeft + "px";
+    }
+    if (newMargLeft < 0) {
+        playhead.style.marginLeft = "0px";
+    }
+    if (newMargLeft > timelineWidth) {
+        playhead.style.marginLeft = timelineWidth + "px";
+    }
+}
+
+// timeUpdate
+// Synchronizes playhead position with current point in audio
+function timeUpdate() {
+    var playPercent = timelineWidth * (savedAudio.seek() / duration);
+    playhead.style.marginLeft = playPercent + "px";
+    if (savedAudio.seek() == duration) {
+        pButton.className = "";
+        pButton.className = "play";
+	}
+	timelineupdate();
+}
+
+function timelineupdate() {
+    isTimelineUpdated = setTimeout(timeUpdate, 10);
+}
+
+//Play and Pause
+function playPauserecording() {
+    if (savedAudio.playing()) { // pause music
+		savedAudio.pause();
+		ifpaused = true;
+		pauseTime = performance.now();
+		clearTimeout(isTimelineUpdated);
+        pButton.className = "";
+		pButton.className = "play";
+	}
+	else {  // remove pause, add play
+		isTimelineUpdated = timelineupdate();
+        savedAudio.play();
+        pButton.className = "";
+		pButton.className = "pause";
+
+		delay +=  performance.now() - pauseTime;
+		ifpaused = false;
+		globalID = requestAnimationFrame(replay);
+    }
+}
+
+function getPosition(el) {
+    return el.getBoundingClientRect().left;
+}
+
+function clickPercent(event) {
+    return (event.clientX - getPosition(timeline)) / timelineWidth;
+}
+
+
+/*
+function pause(){
+	ifpaused = true;
+	pauseTime = performance.now();
+	var button = document.getElementById("controlButton");
+	if (isSoundinPlayback) {savedAudio.pause();}
+	button.onclick = unpause;
+	button.innerHTML = 'Play';
+}
+
+function unpause(){
+	delay +=  performance.now() - pauseTime;
+	ifpaused = false;
+	var button = document.getElementById("controlButton");
+	if (isSoundinPlayback) {savedAudio.play();}
+	button.onclick = pause;
+	button.innerHTML = "Pause";
+	globalID = requestAnimationFrame(replay);
+}
+*/
+
+
+function startReplay(){
+	savedt0 = performance.now();
+	var button = document.getElementById("controlButton");
+	button.onclick = pause;
+	button.innerHTML = "Pause";
+	if (isSoundinPlayback) {
+		savedAudio.play();
+		savedAudio.addEventListener("ended", function() {
+			var button = document.getElementById("controlButton");
+			button.onclick = "";
+			button.innerHTML = "Recording finished";
+		});
+	}
+	else{
+		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
+	}
+	globalID = requestAnimationFrame(replay);
+
 }

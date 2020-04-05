@@ -10,11 +10,35 @@ function init(){
 	$('#upload_recording').on('change', readUploadedfile);
 	document.getElementById('recordingTime').style.display = "none";
 
+    // Update the current pointer width
 	var slider = document.getElementById("pointerWidthRange");
-	// Update the current slider value (each time you drag the slider handle)
 	slider.oninput = function() {
 		changePointerWidth(this.value);
 	}
+
+	pButton = document.getElementById('pButton'); // play button
+	playhead = document.getElementById('playhead'); // playhead
+	timeline = document.getElementById('timeline'); // timeline
+    pButton.addEventListener("click", playPauserecording);
+    timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
+
+    // timeupdate event listener
+
+
+    // makes timeline clickable
+    timeline.addEventListener("click", function(event) {
+        moveplayhead(event);
+        console.log("duration",duration);
+        console.log(clickPercent(event));
+        savedAudio.seek(duration*clickPercent(event));
+    }, false);
+
+
+    // makes playhead draggable
+    playhead.addEventListener('mousedown', timelineSelected, false);
+    window.addEventListener('mouseup', timelineDeselected, false);
+
+
 }
 
 init();
