@@ -236,7 +236,7 @@ var onPaint = function(){
 	ctx.lineTo(mousex, mousey);
 
     ctx.stroke();
-	var move = {x: mousex, y: mouse.y, t:(t1-t0)};
+	var move = {x: mousex/canvas_width, y: mouse.y/canvas_height, t:(t1-t0)};
     record_to_movements(move);
 };
 
@@ -250,7 +250,7 @@ var draw_start = function(e){
 	ctx.beginPath();
 	ctx.moveTo(mouse.x, mouse.y);
 	var t1 = performance.now();
-	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
+	var move = {x: mouse.x/canvas_width, y: mouse.y/canvas_height, t:(t1-t0), s:true};
     record_to_movements(move);
 	current_canvas.addEventListener('mousemove', onPaint, false);
 
@@ -262,7 +262,7 @@ var draw_start_touch = function(e){
 	ctx.beginPath();
 	ctx.moveTo(mouse.x, mouse.y);
 	var t1 = performance.now();
-	var move = {x: mouse.x, y: mouse.y, t:(t1-t0), s:true};
+	var move = {x: mouse.x/canvas_width, y: mouse.y/canvas_height, t:(t1-t0), s:true};
 	movements.push(move);
 	current_canvas.addEventListener('touchmove', onPaint, false);
 };
@@ -286,7 +286,7 @@ function updateMovement(){
     if ('s' in curmove){
 		//mouseSimulate(curmov.x,curmov.y,"mousedown")
 		ctx.beginPath();
-		ctx.moveTo(curmove.x, curmove.y);
+		ctx.moveTo(curmove.x*canvas_width, curmove.y*canvas_height);
     }else if('action' in curmove &&
 			 curmove.action == "create_slide"){
 		new_slide();
@@ -298,7 +298,7 @@ function updateMovement(){
 		change_color.apply(this, curmove.action_param);
 	}else{
 		//mouseSimulate(curmov.x,curmov.y,"mousemove")
-		ctx.lineTo(curmove.x, curmove.y);
+		ctx.lineTo(curmove.x*canvas_width, curmove.y*canvas_height);
 		ctx.stroke();
     }
 }
