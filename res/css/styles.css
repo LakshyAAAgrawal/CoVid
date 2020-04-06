@@ -77,8 +77,9 @@ body {
 	height: 45px;
 	margin: 5px;
 	padding: 10px;
-	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.3); 
+	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.5); 
 	background: #2B547A;
+	border-radius: 30px;
 }
 
 .mode_toggle_color_button:hover{
@@ -125,4 +126,5 @@ body {
 	align-items: center;
 	justify-content: center;
 	border-radius: 35px;
+	background: white;
 }
