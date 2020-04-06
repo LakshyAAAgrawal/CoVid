@@ -7,6 +7,7 @@ var num_slides = 0;
 var movements = new Array();
 var t0;
 var savedMovements;
+var playedSavedMovements;
 var savedAudio;
 var savedt0;
 var globalID;
@@ -43,10 +44,27 @@ function record_to_movements(entry){
 }
 
 function startRecord(){
-	t0 = performance.now();
+
 	to_record = true;
 	movements = new Array();
 	startRecordingtimer();
+
+	record_to_movements({
+		t: -1,
+		action: "change_slide",
+		action_param: [current_canvas.id]
+	});
+	record_to_movements({
+		t: -1,
+		action: "change_color",
+		action_param: [current_canvas.getContext('2d').strokeStyle]
+	});
+
+	record_to_movements({
+		t: -1,
+		action: "changePointerWidth",
+		action_param: [current_canvas.getContext('2d').lineWidth]
+	});
 
 	seconds = 0; minutes = 0; hours = 0;
 	document.getElementById('recordingTime').style.display = "block";
@@ -55,7 +73,7 @@ function startRecord(){
 	var button = document.getElementById("recordButton");
 	button.innerHTML = "Stop Recording";
 	button.onclick = stop_record;
-
+	t0 = performance.now();
 	navigator.mediaDevices.getUserMedia({ audio: true })
 		.then(stream => {
 			isSoundRecorded = true;
@@ -65,8 +83,13 @@ function startRecord(){
 				audioBitsPerSecond : 32000,
 				mimeType : 'audio/webm;codecs=opus'
 			  }
+
+			t0 = performance.now();
+
 			mediaRecorder = new MediaRecorder(stream, options);
 			mediaRecorder.start();
+
+
 
 			const audioChunks = [];
 			mediaRecorder.addEventListener("dataavailable", event => {
@@ -81,6 +104,7 @@ function startRecord(){
 		.catch(function(err) {
 			document.getElementById('issoundRecorded').innerText = "Sound Not recorded";
 			isSoundRecorded = false;
+			t0 = performance.now();
 		  });
 
 }
@@ -172,7 +196,7 @@ function convert_json_to_compressed_form(movementList){
 function getMouseBlob(){
 	var toStore = convert_json_to_compressed_form(movements);
 	var file = new Blob([toStore], {type: 'text/plain'});
-	return file
+	return file;
 }
 
 ///// Update time counter block
@@ -187,7 +211,7 @@ function updateRecordTime() {
             hours++;
         }
     }
-    recordingTime = document.getElementById('recordingTime'),
+    recordingTime = document.getElementById('recordingTime');
     recordingTime.textContent = (hours ? (hours > 9 ? hours : "0" + hours) : "00") + ":" + (minutes ? (minutes > 9 ? minutes : "0" + minutes) : "00") + ":" + (seconds > 9 ? seconds : "0" + seconds);
     startRecordingtimer();
 }
@@ -226,7 +250,8 @@ function new_slide(){
 	var t1 = performance.now();
 	record_to_movements({
 		t: t1 - t0,
-		action: "create_slide"
+		action: "create_slide",
+		action_param: []
 	});
 	return slide_id;
 }
@@ -278,7 +303,7 @@ function set_current(slide_id){
 	current_canvas.addEventListener('touchend', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchcancel', prevent_touch_move_callback, false);
 
-	setPen();
+	//setPen();
 
 	var t1 = performance.now();
 	record_to_movements({
@@ -317,7 +342,6 @@ function change_color(color){
 var onPaint = function(){
 
 	var t1 = performance.now();
-	var ctx = current_canvas.getContext('2d');
 	drawPointer(mouse.x, mouse.y);
 
     record_to_movements({
@@ -329,6 +353,7 @@ var onPaint = function(){
 
 //Make a line from initial position to current position of mouse
 function drawPointer(xCoordinate, yCoordinate){
+	var ctx = current_canvas.getContext('2d');
 	ctx.lineTo(xCoordinate, yCoordinate);
 	ctx.stroke();
 }
@@ -384,9 +409,7 @@ function movePointer(xCoordinate, yCoordinate){
 }
 
 // Get a movement and simulate a particular movement
-function updateMovement(){
-    var curmove = savedMovements.shift();
-	var ctx = current_canvas.getContext('2d');
+function updateMovement(curmove){
     if (curmove.action == "movePointer"){
 		movePointer.apply(this, curmove.action_param)
     }else if('action' in curmove &&
@@ -412,7 +435,9 @@ function replay(){
 		var currentT = performance.now();
 		var temp = currentT - savedt0 - delay;
 		if (savedMovements[0].t < temp){
-			updateMovement();
+			var curmove = savedMovements.shift();
+			playedSavedMovements.push(curmove);
+			updateMovement(curmove);
 		}
 		globalID = requestAnimationFrame(replay);
 	}
@@ -428,10 +453,6 @@ function replay(){
 ////////////////////////////////////////////////
 
 function readUploadedfile(evt){
-	var button = document.getElementById("controlButton");
-	button.onclick = startReplay;
-	button.innerHTML = "Replay";
-	button.style.display = 'block';
 
 	var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
@@ -485,6 +506,7 @@ function handleFile(f){
 							savedAudio.once('load', function(){
 								duration = savedAudio._duration;
 								document.getElementById('audioplayer').style.display = "block";
+								timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
 							  });
 
 						})
@@ -508,8 +530,8 @@ function handleFileSelect(evt){
 					to_record = false;
 					new_slide_id = new_slide();
 					to_record = tmp;
-					//canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, canvas_width, canvas_height);
-					document.getElementById(new_slide_id).style.backgroundImage = "url(" + image.src +")";
+					canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, canvas_width, canvas_height);
+					//document.getElementById(new_slide_id).style.backgroundImage = "url(" + image.src +")";
 				}
 			}, false);
 			reader.readAsDataURL(f);
@@ -535,13 +557,15 @@ function handleFileSelect(evt){
 								viewport: viewport
 							};
 							var renderTask = page.render(renderContext);
-
+							/*
+							For eraser
 							renderTask.promise.then(function () {
 								/// Convert canvas to image and put it in background to make it non erasable by eraser
 								var imgData = canvas.toDataURL('image/png');
 								canvas.getContext('2d').clearRect(0, 0, canvas_width, canvas_height);
 								document.getElementById(new_slide_id).style.backgroundImage = "url(" + imgData +")";
 							});
+							*/
 						});
 					}
 				}, function (reason) {
@@ -600,6 +624,8 @@ window.onbeforeunload = function() {
 	return "Eak bar punha vichar kare"
 }
 
+/*
+For eraser extension
 function setEraser(){
 	current_canvas.getContext("2d").globalCompositeOperation = "destination-out";
 }
@@ -607,6 +633,7 @@ function setEraser(){
 function setPen(){
 	current_canvas.getContext("2d").globalCompositeOperation = "source-over";
 }
+*/
 
 // mouseDown EventListener
 function timelineSelected() {
@@ -619,12 +646,28 @@ function timelineSelected() {
 function timelineDeselected(event) {
     if (onplayhead == true) {
         moveplayhead(event);
-        window.removeEventListener('mousemove', moveplayhead, true);
+		window.removeEventListener('mousemove', moveplayhead, true);
+		mouserewindForward(savedAudio.seek(),duration*clickPercent(event));
         savedAudio.seek(duration*clickPercent(event));
 
     }
     onplayhead = false;
 }
+
+
+function mouserewindForward(currentTime, newtime){
+	if(currentTime>newtime){
+		rewind(newtime*1000);
+	}
+	else{
+		forward(newtime*1000);
+	}
+}
+
+
+
+
+
 // mousemove EventListener
 // Moves playhead as user drags
 function moveplayhead(event) {
@@ -644,30 +687,94 @@ function moveplayhead(event) {
 // Synchronizes playhead position with current point in audio
 function timeUpdate() {
     var playPercent = timelineWidth * (savedAudio.seek() / duration);
-    playhead.style.marginLeft = playPercent + "px";
+	playhead.style.marginLeft = playPercent + "px";
+
     if (savedAudio.seek() == duration) {
         pButton.className = "";
         pButton.className = "play";
 	}
-	timelineupdate();
+	requestAnimationFrame(timeUpdate);
 }
+
 
 function timelineupdate() {
-    isTimelineUpdated = setTimeout(timeUpdate, 10);
+	requestAnimationFrame(timeUpdate);
 }
 
+
+function syncAudioMouse(){
+	var temp = performance.now() - savedt0 - delay;
+	var currAudio = savedAudio.seek()*1000;
+
+	if(temp!=currAudio){
+		delay = delay + temp - currAudio;
+		console.log(delay);
+	}
+	syncAudioMouseCall();
+}
+
+function syncAudioMouseCall(){
+	setTimeout(syncAudioMouse, 1000);
+}
+
+
 //Play and Pause
+
+
+function startReplay() {
+	savedt0 = performance.now();
+	pButton.addEventListener("click", playPauserecording);
+	syncAudioMouseCall();
+	timelineupdate();
+	if (isSoundinPlayback) {
+		savedAudio.play();
+	}
+	else{
+		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
+	}
+	globalID = requestAnimationFrame(replay);
+}
+
+
+/*
+
+function startReplay(){
+	savedt0 = performance.now();
+	var button = document.getElementById("controlButton");
+	button.onclick = pause;
+	button.innerHTML = "Pause";
+	if (isSoundinPlayback) {
+		savedAudio.play();
+		savedAudio.addEventListener("ended", function() {
+			var button = document.getElementById("controlButton");
+			button.onclick = "";
+			button.innerHTML = "Recording finished";
+		});
+	}
+	else{
+		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
+	}
+	globalID = requestAnimationFrame(replay);
+
+}
+*/
+
+
+
+
+
+
 function playPauserecording() {
     if (savedAudio.playing()) { // pause music
 		savedAudio.pause();
 		ifpaused = true;
 		pauseTime = performance.now();
-		clearTimeout(isTimelineUpdated);
+		//clearTimeout(isTimelineUpdated);
         pButton.className = "";
 		pButton.className = "play";
 	}
 	else {  // remove pause, add play
-		isTimelineUpdated = timelineupdate();
+		//timelineupdate();
         savedAudio.play();
         pButton.className = "";
 		pButton.className = "pause";
@@ -709,22 +816,43 @@ function unpause(){
 */
 
 
-function startReplay(){
-	savedt0 = performance.now();
-	var button = document.getElementById("controlButton");
-	button.onclick = pause;
-	button.innerHTML = "Pause";
-	if (isSoundinPlayback) {
-		savedAudio.play();
-		savedAudio.addEventListener("ended", function() {
-			var button = document.getElementById("controlButton");
-			button.onclick = "";
-			button.innerHTML = "Recording finished";
-		});
+
+
+function forward(time){
+	delay -= time;
+	while(savedMovements.length>0){
+		var currentT = performance.now();
+		var temp = currentT - savedt0 - delay;
+		if (savedMovements[0].t < temp){
+			var curmove = savedMovements.shift();
+			playedSavedMovements.push(curmove);
+			updateMovement(curmove);
+		}
+		else{
+			break;
+		}
 	}
-	else{
-		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
+}
+
+function rewind(time){
+	delay += time;
+    for (var k in canvas_dict) {
+		canvas_dict[k].getContext('2d').clearRect(0,0,canvas_width,canvas_height);
+    }
+
+	var i = 0;
+	while(i<playedSavedMovements.length){
+		var curmove = playedSavedMovements[i];
+		if(curmove.t<time){
+			updateMovement(curmove);
+		}
+		else{
+			break;
+		}
+		i += 1;
 	}
-	globalID = requestAnimationFrame(replay);
+	while(i!= playedSavedMovements.length){
+		savedMovements.unshift(playedSavedMovements.pop());
+	}
 
 }

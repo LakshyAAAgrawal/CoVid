@@ -4,7 +4,8 @@ function init(){
 	set_current(initial_canvas);
 	movements = new Array();
 	t0 = 0;
-	savedMovements =  new Array();
+    savedMovements =  new Array();
+    playedSavedMovements = new Array();
 	savedt0 = performance.now();
 	$('#upload_slides').on('change', handleFileSelect);
 	$('#upload_recording').on('change', readUploadedfile);
@@ -19,8 +20,8 @@ function init(){
 	pButton = document.getElementById('pButton'); // play button
 	playhead = document.getElementById('playhead'); // playhead
 	timeline = document.getElementById('timeline'); // timeline
-    pButton.addEventListener("click", playPauserecording);
-    timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
+    pButton.addEventListener("click", startReplay);
+
 
     // timeupdate event listener
 
@@ -30,6 +31,7 @@ function init(){
         moveplayhead(event);
         console.log("duration",duration);
         console.log(clickPercent(event));
+        mouserewindForward(savedAudio.seek(),duration*clickPercent(event));
         savedAudio.seek(duration*clickPercent(event));
     }, false);
 
