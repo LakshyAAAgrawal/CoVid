@@ -26,7 +26,7 @@ var isSoundRecorded = true;
 var isSoundinPlayback = false;   // true when sound is present is uploaded file
 var current_mode = "view";
 var isTimelineUpdated;
-
+var isrecordingMode = true;   /// Default is recording
 var duration;
 var pButton; // play button
 var playhead ; // playhead
@@ -51,6 +51,9 @@ function change_mode(target){
 		current_mode = "view";
 		$("#view_mode_button").css("background", "blue");
 		$("#rec_mode_button").css("background", "white");
+		isrecordingMode = false;
+		removeEventFromcanvas(current_canvas);
+
 	}else if(target === "rec"){
 		$(".view").css("display", "none");
 		$(".rec").css("display", "block");
@@ -59,6 +62,8 @@ function change_mode(target){
 		current_mode = "rec";
 		$("#rec_mode_button").css("background", "blue");
 		$("#view_mode_button").css("background", "white");
+		isrecordingMode = true;
+		addEventListenertoCanvas(current_canvas);
 	}
 	reset_canvas_dimension();
 }
@@ -298,37 +303,24 @@ function new_slide(){
 }
 
 //Sets the current slide to a specific slide id
-function set_current(slide_id){
-	var strokeStyle = '#00CC99';
-	var lineWidth = 3;
-	if(typeof current_canvas !== 'undefined'){
 
-		ctx = current_canvas.getContext('2d');   /// To carry forward the same linewidth and
-		strokeStyle = ctx.strokeStyle;			 /// color to next slide when the slide is changed
-		lineWidth = ctx.lineWidth
+function removeEventFromcanvas(current_canvas){
+	current_canvas.removeEventListener('mousemove', updateMousePos, false);
+	current_canvas.removeEventListener('mousedown', draw_start, false);
+	current_canvas.removeEventListener('mouseup', draw_stop, false);
 
-		current_canvas.style.display = 'none';
-		current_canvas.removeEventListener('mousemove', updateMousePos, false);
-		current_canvas.removeEventListener('mousedown', draw_start, false);
-		current_canvas.removeEventListener('mouseup', draw_stop, false);
+	current_canvas.removeEventListener('touchmove', updateTouchPos, false);
+	current_canvas.removeEventListener('touchstart', draw_start_touch, false);
+	current_canvas.removeEventListener('touchend', draw_stop, false);
+	current_canvas.removeEventListener('touchcancel', draw_stop, false);
 
-		current_canvas.removeEventListener('touchmove', updateTouchPos, false);
-		current_canvas.removeEventListener('touchstart', draw_start_touch, false);
-		current_canvas.removeEventListener('touchend', draw_stop, false);
-		current_canvas.removeEventListener('touchcancel', draw_stop, false);
+	current_canvas.removeEventListener('touchmove', prevent_touch_move_callback, false);
+	current_canvas.removeEventListener('touchstart', prevent_touch_move_callback, false);
+	current_canvas.removeEventListener('touchend', prevent_touch_move_callback, false);
+	current_canvas.removeEventListener('touchcancel', prevent_touch_move_callback, false);
+}
 
-		current_canvas.removeEventListener('touchmove', prevent_touch_move_callback, false);
-		current_canvas.removeEventListener('touchstart', prevent_touch_move_callback, false);
-		current_canvas.removeEventListener('touchend', prevent_touch_move_callback, false);
-		current_canvas.removeEventListener('touchcancel', prevent_touch_move_callback, false);
-	}
-
-	canvas_dict[slide_id].style.display = 'block';
-	current_canvas = canvas_dict[slide_id];
-	ctx = current_canvas.getContext('2d');
-	ctx.lineWidth = lineWidth;
-	ctx.strokeStyle = strokeStyle;
-	reset_canvas_dimension();
+function addEventListenertoCanvas(current_canvas){
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
@@ -342,6 +334,34 @@ function set_current(slide_id){
 	current_canvas.addEventListener('touchstart', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchend', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchcancel', prevent_touch_move_callback, false);
+}
+
+
+function set_current(slide_id){
+	var strokeStyle = '#00CC99';
+	var lineWidth = 3;
+	if(typeof current_canvas !== 'undefined'){
+
+		ctx = current_canvas.getContext('2d');   /// To carry forward the same linewidth and
+		strokeStyle = ctx.strokeStyle;			 /// color to next slide when the slide is changed
+		lineWidth = ctx.lineWidth
+
+		current_canvas.style.display = 'none';
+		if(isrecordingMode){
+			removeEventFromcanvas(current_canvas);
+		}
+
+	}
+
+	canvas_dict[slide_id].style.display = 'block';
+	current_canvas = canvas_dict[slide_id];
+	ctx = current_canvas.getContext('2d');
+	ctx.lineWidth = lineWidth;
+	ctx.strokeStyle = strokeStyle;
+	reset_canvas_dimension();
+	if(isrecordingMode){
+		addEventListenertoCanvas(current_canvas);
+	}
 
 	//setPen();
 	var t1 = performance.now();
@@ -857,7 +877,7 @@ function syncAudioMouse(){
 
 	if(temp!=currAudio){
 		delay = delay + temp - currAudio;
-		console.log(delay);
+		console.log("delay",delay);
 	}
 	syncAudioMouseCall();
 }
