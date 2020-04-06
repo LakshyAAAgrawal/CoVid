@@ -1,12 +1,138 @@
+:root {
+  --vertical-bar-width: 75px;
+}
+
 #a { display: none; }
 
-#body {
+body {
     margin: 0px;
     padding: 0px;
+	width: 100%;
 }
 
 .scrollable {
-    width: 200px;
-    height: 400px;
-    overflow-x: scroll;
+    overflow: auto;
+	height: 100%;
+}
+
+.canvas_instance{
+	border-style: inset;
+	border: solid 5pt #F10C45;
+	box-shadow: 0 15px 15px rgba(0, 0, 0, 0.3); 
+}
+
+#pointerWidthRange{
+	width:64px;
+	margin: 5px;
+}
+
+.view{}
+.rec{}
+.title{}
+.slide_controls{}
+.slide_buttons{}
+.slide_list{}
+.draw_controls{
+	width: 75px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+#canvas_container{
+	position: absolute;
+	left: 75px;
+	down: 75px;
+	right: 75px;
+	text-align: center;
+}
+.import_doc{}
+.export_rec{}
+.record_control{
+	display:flex;
+	flex-direction: row;
+}
+.replay_control{}
+.color_button{
+	width: 64px;
+	height: 64px;
+	margin: 5px;
+	border-radius: 50%;
+	border: 20px;
+	border-color: white;
+	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.3); 
+}
+.color_button:hover{
+	filter: brightness(110%);
+}
+
+.left_bar{
+	position: fixed;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: var(--vertical-bar-width);
+	background: #31668A;
+	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.3); 
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.mode_toggle_color_button{
+	width: 45px;
+	height: 45px;
+	margin: 5px;
+	padding: 10px;
+	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.5); 
+	background: #2B547A;
+	border-radius: 30px;
+}
+
+.mode_toggle_color_button:hover{
+	filter: brightness(110%);
+}
+
+.bottom_bar{
+	position: fixed;
+	display: flex;
+	bottom: 0;
+	background: #6B7C85;
+	left: 100px;
+	right: 100px;
+	height: 75px;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	border-radius: 35px;
+}
+
+.right_bar{
+	position: fixed;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: var(--vertical-bar-width);
+	background: #31668A;
+}
+
+.button{
+	width: 100%;
+	color: cyan;
+}
+
+.button:hover{
+	filter: brightness(200%);
+}
+
+.mode_toggle{
+	display: flex;
+	height: 69px;
+	margin-right: 40px;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	border-radius: 35px;
+	background: white;
 }

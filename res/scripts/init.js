@@ -1,5 +1,7 @@
 function init(){
 	canvas_list = [];
+	window.addEventListener('resize', reset_canvas_dimension);
+	reset_canvas_dimension();
 	var initial_canvas = new_slide();
 	set_current(initial_canvas);
 	movements = new Array();
@@ -15,6 +17,9 @@ function init(){
 	slider.oninput = function() {
 		changePointerWidth(this.value);
 	}
+	change_mode('rec');
+	$("#right_scroll_bar").css("height", $(window).height() - (side_bar_width * 3 + 10));
+	console.log($(window).height() - (side_bar_width * 3 + 10));
 }
 
 init();

@@ -12,24 +12,74 @@ var savedt0;
 var globalID;
 var debug_count = 0;
 var to_record = false;
-var canvas_height = 700;
-var canvas_width = 1000;
+var side_bar_width = 75;
+var canvas_height = 900;
+var canvas_width = 1600;
 var delay = 0;
-var pauseTime = 0
+var pauseTime = 0;
 var ifpaused = false;
 var mediaRecorder;
 var recordTimeCounter;
 var seconds = 0, minutes = 0, hours = 0; // For record Timer
 var isSoundRecorded = true;
 var isSoundinPlayback = false;   // true when sound is present is uploaded file
-
+var current_mode = "view";
 
 // Check save feature in chrome
-
 
 function record_to_movements(entry){
 	if(to_record){
 		movements.push(entry);
+	}
+}
+
+function change_mode(target){
+	if(target === "view"){
+		$(".left_bar").css("display", "none");
+		$(".right_bar").css("display", "none");
+		$(".rec").css("display", "none");
+		$(".view").css("display", "block");
+		current_mode = "view";
+		$("#view_mode_button").css("background", "blue");
+		$("#rec_mode_button").css("background", "white");
+	}else if(target === "rec"){
+		$(".view").css("display", "none");
+		$(".rec").css("display", "block");
+		$(".left_bar").css("display", "block");
+		$(".right_bar").css("display", "block");
+		current_mode = "rec";
+		$("#rec_mode_button").css("background", "blue");
+		$("#view_mode_button").css("background", "white");
+	}
+	reset_canvas_dimension();
+}
+
+function reset_canvas_dimension(e){
+	var max_canvas_width = 0;
+	if(current_mode == "rec"){
+		max_canvas_width = $(window).width() - (2*side_bar_width + 10);
+	}else{
+		max_canvas_width = $(window).width() - 10;
+	}
+	var max_canvas_height = $(window).height() - (side_bar_width + 20);
+	var canvas_scale = Math.min((max_canvas_height / canvas_height), (max_canvas_width / canvas_width));
+	canvas_width = Math.floor(canvas_width * canvas_scale);
+	canvas_height = Math.floor(canvas_height * canvas_scale);
+	if(typeof current_canvas !== 'undefined'){
+		var img = new Image();
+		img.src = current_canvas.toDataURL();
+		img.onload = function(){
+			current_canvas.height = canvas_height;
+			current_canvas.width = canvas_width;
+			current_canvas.style.height = canvas_height.toString() + "px";
+			current_canvas.style.width = canvas_width.toString() + "px";
+			current_canvas.getContext('2d').drawImage(img, 0, 0, canvas_width, canvas_height);
+			var ctx = current_canvas.getContext('2d');
+			ctx.lineWidth = 3;
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+			ctx.strokeStyle = '#00CC99';
+		}
 	}
 }
 
@@ -46,7 +96,6 @@ function startRecord(){
 	var button = document.getElementById("recordButton");
 	button.innerHTML = "Stop Recording";
 	button.onclick = stop_record;
-
 	navigator.mediaDevices.getUserMedia({ audio: true })
 		.then(stream => {
 			isSoundRecorded = true;
@@ -191,7 +240,8 @@ function startRecordingtimer() {
 
 function new_slide(){
 	var slide_id = (num_slides++);
-	var new_canvas = $('<canvas/>', {"style":"border: solid 5pt blue", "width":canvas_width, "height":canvas_height, "id":slide_id}).get(0);
+	var new_canvas = $('<canvas/>', {"width":canvas_width, "height":canvas_height, "id":slide_id, "class":"canvas_instance"}).get(0);
+	$(new_canvas).css("margin", "auto");
 	canvas_dict[slide_id] = new_canvas;
 	$("#canvas_list").append(new_canvas);
 	new_canvas.style.display = 'none';
@@ -250,11 +300,10 @@ function set_current(slide_id){
 
 	canvas_dict[slide_id].style.display = 'block';
 	current_canvas = canvas_dict[slide_id];
-
 	ctx = current_canvas.getContext('2d');
 	ctx.lineWidth = lineWidth;
 	ctx.strokeStyle = strokeStyle;
-
+	reset_canvas_dimension();
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
@@ -270,7 +319,6 @@ function set_current(slide_id){
 	current_canvas.addEventListener('touchcancel', prevent_touch_move_callback, false);
 
 	setPen();
-
 	var t1 = performance.now();
 	record_to_movements({
 		t: t1 - t0,
@@ -309,18 +357,17 @@ var onPaint = function(){
 
 	var t1 = performance.now();
 	var ctx = current_canvas.getContext('2d');
-	drawPointer(mouse.x, mouse.y);
-
+	drawPointer(mouse.x/canvas_width, mouse.y/canvas_height);
     record_to_movements({
 		t:(t1-t0),
 		action:'m', /// Stands for move
-		action_param: [mouse.x,mouse.y]
+		action_param: [mouse.x/canvas_width, mouse.y/canvas_height]
 	});
 };
 
 //Make a line from initial position to current position of mouse
 function drawPointer(xCoordinate, yCoordinate){
-	ctx.lineTo(xCoordinate, yCoordinate);
+	ctx.lineTo(xCoordinate*canvas_width, yCoordinate*canvas_height);
 	ctx.stroke();
 }
 
@@ -332,13 +379,13 @@ var draw_stop = function(){
 var draw_start = function(e){
 	var ctx = current_canvas.getContext('2d');
 
-	movePointer(mouse.x, mouse.y);
+	movePointer(mouse.x/canvas_width, mouse.y/canvas_height);
 
 	var t1 = performance.now();
     record_to_movements({
 		t:(t1-t0),
 		action:'movePointer',
-		action_param: [mouse.x,mouse.y]
+		action_param: [mouse.x/canvas_width, mouse.y/canvas_height]
 	});
 	current_canvas.addEventListener('mousemove', onPaint, false);
 };
@@ -352,7 +399,7 @@ var draw_start_touch = function(e){
     record_to_movements({
 		t:(t1-t0),
 		action:'movePointer',
-		action_param: [mouse.x,mouse.y]
+		action_param: [mouse.x/canvas_width, mouse.y/canvas_height]
 	});
 	current_canvas.addEventListener('touchmove', onPaint, false);
 };
@@ -371,7 +418,7 @@ function updateTouchPos(evt){
 
 function movePointer(xCoordinate, yCoordinate){
 	ctx.beginPath();
-	ctx.moveTo(xCoordinate, yCoordinate);
+	ctx.moveTo(xCoordinate*canvas_width, yCoordinate*canvas_height);
 }
 
 // Get a movement and simulate a particular movement

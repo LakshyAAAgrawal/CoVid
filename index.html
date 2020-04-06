@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
   <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -7,88 +7,87 @@
 	<script src="res/scripts/dist/jszip.js"></script>
 	<script src="res/scripts/dist/FileSaver.js"></script>
 	<script src="res/scripts/decl.js"></script>
-    <link rel="stylesheet" href="res/css/styles.css">
+	<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+	<link rel="stylesheet" href="res/css/styles.css">
   </head>
 
-  <body data-rsssl=1>
-	<font size="6"><strong>CoVid </strong></font>
-	<table>
-	  <tr>
-		<th>
-		  Slides
-		  <ul>
-			<li><button id="nextSlide" onclick="change_slide(1)" >Next Slide</button></li>
-			<li><button id="previousSlide" onclick="change_slide(-1)" >Previous Slide</button></li>
-		  </ul>
-		  <div class="scrollable">
-			<ol id="slides_list">
-			</ol>
+  <body>
+	<div class="right_bar">
+	  <div class="draw_controls rec scrollable">
+		<input class="color_button" type="button" style="background-color:#000000"  onclick="change_color('#000000')">
+		<input class="color_button" type="button" style="background-color:#00CC99"  onclick="change_color('#00CC99')">
+		<input class="color_button" type="button" style="background-color:#cc1f00"  onclick="change_color('#cc1f00')">
+		<input class="color_button" type="button" style="background-color:#00cc25"  onclick="change_color('#00cc25')">
+		<input class="color_button" type="button" style="background-color:#475F94"  onclick="change_color('#475F94')">
+		<input class="color_button" type="button" style="background-color:#FDDC5C"  onclick="change_color('#FDDC5C')">
+		<input class="color_button" type="button" style="background-color:#FA4224"  onclick="change_color('#FA4224')">
+		<input class="color_button" type="button" onclick="setEraser()" value="Eraser">
+		<div class="slidecontainer">
+		  <input type="range" min="1" max="10" value="3" width=75px class="slider" id="pointerWidthRange">
+		</div>
+	  </div>  
+	</div>
+	
+	<div class="bottom_bar">
+	  <div class="mode_toggle">
+		<img id="view_mode_button" onclick="change_mode('view')" src="res/images/view-mode-button.svg" class="mode_toggle_color_button">View/Record</img>
+		<img id="rec_mode_button" onclick="change_mode('rec')" src="res/images/record-mode-button.svg" class="mode_toggle_color_button"></img>
+	  </div>
+	  
+	  <div class="import_doc rec view">
+		<input type="file" id="upload_slides" name="files[]" accept="image/*,.pdf" src="res/images/import_base_pdf.svg" style="display:none;"/>
+		<img onclick="$('#upload_slides').click();" src="res/images/import_base_pdf.svg" class="mode_toggle_color_button"></img>
+	  </div>
+	  
+	  <div class="replay_control view">
+		<input type="file" id="upload_recording" name="files[]" style="display:none;" multiple />
+		<img onclick="$('#upload_recording').click();" src="res/images/import_lecture_content.svg" class="mode_toggle_color_button"></img>
+		<button id="controlButton" class ="controlbutton" onclick=""></button>
+		<div id="issoundpresent"></div>
+		<div>
+		  <audio id="audio" controls>
+			<source id="source" src="" type="audio/ogg"/>
+		  </audio>
+		  <section class="sound-clips">
+		  </section>
+		</div>
+	  </div>
 
-			<button onclick="new_slide();">Add New Slide</button> <br>
+	  
+	  <div class="export_doc rec">
+		<img id="exportPDF" onclick="exportPDF()" src="res/images/export_pdf.png" class="mode_toggle_color_button"></img>
+	  </div>
+	  
+	  <div class="record_control rec">
+		<img id="recordButton" onclick="startRecord()" src="res/images/start_recording.svg" class="mode_toggle_color_button"></img>
+		<img id="pauserecordButton" onclick="pauseRecording()" src="res/images/pause_recording.png" class="mode_toggle_color_button"></img>
+		<img id="recordButton" onclick="stop_record()" src="res/images/stop_recording.svg" class="mode_toggle_color_button"></img>
+		<div id="recordingTime"><time>00:00:00</time></div>
+		<div id="issoundRecorded"></div>
+	  </div>
+	  
+	</div>
+
+	<div class="left_bar">
+	  <div class="slide_controls rec">
+		<div class="slide_buttons">
+		  <img class="button" id="nextSlide" onclick="change_slide(1)" src="res/images/arrow-right-circle.svg"></img>
+		  <img class="button" id="previousSlide" onclick="change_slide(-1)" src="res/images/arrow-left-circle.svg"></img>
+		  <img class="button" onclick="new_slide();" src="res/images/plus-circle.svg"></img>
+		</div>
+		<div class="slide_list">
+		  <div class="scrollable" id="right_scroll_bar">
+			<div id="slides_list">
+			</div>
 		  </div>
-		</th>
-
-		<th>
-		  <ol id="canvas_list"></ol>
-		</th>
-
-		<th>
-		  <ul>
-			<li><input type="button" style="background-color:#000000"  onclick="change_color('#000000')"></li>
-			<li><input type="button" style="background-color:#00CC99"  onclick="change_color('#00CC99')"></li>
-			<li><input type="button" style="background-color:#cc1f00"  onclick="change_color('#cc1f00')"></li>
-			<li><input type="button" style="background-color:#00cc25"  onclick="change_color('#00cc25')"></li>
-			<li><input type="button" style="background-color:#475F94"  onclick="change_color('#475F94')"></li>
-			<li><input type="button" style="background-color:#FDDC5C"  onclick="change_color('#FDDC5C')"></li>
-			<li><input type="button" style="background-color:#FA4224"  onclick="change_color('#FA4224')"></li>
-			<li><input type="button" onclick="setEraser()" value="Eraser"></li>
-			<li><input type="button" onclick="setPen()" value="Pen"></li>
-		  </ul>
-		</th>
-
-	  <tr/>
-
-	  <tr>
-		<th>
-		  <input type="file" id="upload_slides" name="files[]" accept="image/*,.pdf" />
-		</th>
-
-		<th>
-		  <button id="recordButton" onclick="startRecord()" >Start Record</button>
-		  <button id="pauserecordButton" onclick="pauseRecording()" >Pause Record</button>
-		  <button id="exportPDF" onclick="exportPDF()" >Export As PDF</button>
-		  <p id="recordingTime"><time>00:00:00</time></p>
-		  <p id="issoundRecorded"></p>
-		</th>
-
-		<th>
-
-			<div class="slidecontainer">
-				<input type="range" min="1" max="10" value="3" class="slider" id="pointerWidthRange">
-			  </div>
-
-			<input type="file" id="upload_recording" name="files[]" />
-			
-			<button id="controlButton" class ="controlbutton"  onclick="" ></button>
-			<p id="issoundpresent"></p>
-			<section class="sound-clips">
-			</section>
-
-		</th>
-
-		<th></th>
-	  <tr/>
-	  <tr>
-		<th></th>
-		<th>
-		  <div>
-			<p> Made with &#60;3 by Lakshya and Archit </p>
-		  </div>
-		</th>
-		<th></th>
-	  </tr>
-	</table>
-
+		</div>
+	  </div>
+	</div>
+	
+	<div class="canvas rec view" id="canvas_container">
+	  <div id="canvas_list"></div>
+	</div>
+	
 	<script src="res/scripts/init.js"></script>
   </body>
 </html>
