@@ -50,9 +50,15 @@ body {
 .export_rec{}
 .record_control{
 	display:flex;
-	flex-direction: row;
+	flex-direction: column;
 }
-.replay_control{}
+.replay_control{
+	display: inline-block;
+}
+
+#audioplayer{
+}
+
 .color_button{
 	width: 64px;
 	height: 64px;
@@ -106,6 +112,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	border-radius: 35px;
+	max-height: 75px;
 }
 
 .right_bar{
@@ -135,4 +142,92 @@ body {
 	justify-content: center;
 	border-radius: 35px;
 	background: white;
+}
+.controlbutton{
+    display: none;
+}
+
+.pauserecordButton{
+  display: none;
+}
+
+
+.slidecontainer {
+    width: 100%; /* Width of the outside container */
+  }
+
+  /* The slider itself */
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%; /* Full-width */
+    height: 25px; /* Specified height */
+    background: #d3d3d3; /* Grey background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+  }
+
+  /* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+  }
+
+  /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+  }
+
+.slider::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+  }
+
+
+#audioplayer{
+    width: 480px;
+    height: 64px;
+    margin: auto;
+    border: solid;
+    display: none;
+}
+
+#pButton{
+      height:60px;
+      width: 60px;
+      border: none;
+      background-size: 50% 50%;
+      background-repeat: no-repeat;
+      background-position: center;
+      float:left;
+      outline:none;
+}
+
+.play{background: url('http://www.alexkatz.me/codepen/img/play.png') ;}
+.pause{background: url('http://www.alexkatz.me/codepen/img/pause.png') ;}
+
+#timeline{
+    width: 400px;
+    height: 20px;
+    margin-top: 20px;
+    float: left;
+    border-radius: 15px;
+    background: rgba(0,0,0,.3);
+	
+}
+#playhead{
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    margin-top: 1px;
+    background: rgba(0, 0, 0,1);
+	
 }
