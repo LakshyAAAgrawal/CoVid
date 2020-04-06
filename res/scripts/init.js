@@ -26,9 +26,9 @@ function init(){
     pButton.addEventListener("click", startReplay);
 
 
-    timeline.addEventListener("click", timelineClicked,false);
-    playhead.addEventListener('mousedown', timelineSelected, false);
-    window.addEventListener('mouseup', timelineDeselected, false);
+    //timeline.addEventListener("click", timelineClicked,false);
+    //playhead.addEventListener('mousedown', timelineSelected, false);
+    //window.addEventListener('mouseup', timelineDeselected, false);
 
 }
 

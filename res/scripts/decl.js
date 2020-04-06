@@ -51,6 +51,8 @@ function change_mode(target){
 		current_mode = "view";
 		$("#view_mode_button").css("background", "blue");
 		$("#rec_mode_button").css("background", "white");
+		$(".bottom_bar").css("right", "20px");
+		$(".bottom_bar").css("left", "20px");
 		isrecordingMode = false;
 		removeEventFromcanvas(current_canvas);
 
@@ -62,6 +64,8 @@ function change_mode(target){
 		current_mode = "rec";
 		$("#rec_mode_button").css("background", "blue");
 		$("#view_mode_button").css("background", "white");
+		$(".bottom_bar").css("right", "80px");
+		$(".bottom_bar").css("left", "80px");
 		isrecordingMode = true;
 		addEventListenertoCanvas(current_canvas);
 	}
@@ -791,7 +795,7 @@ function startReplay() {
 	}
 	else{
 		duration = savedMovements[savedMovements.length - 1]['t']/1000;
-		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
+		document.getElementById("issoundpresent").innerHTML = "Sound not present";
 	}
 	globalID = requestAnimationFrame(replay);
 }
@@ -823,14 +827,17 @@ function clickPercent(event) {
 
 
 function mouserewindForward(currentTime, newtime){
-	timeline.removeEventListener("click", timelineClicked,false);
+	//timeline.removeEventListener("click", timelineClicked,false);
+	ifpaused = true;
 	if(currentTime>newtime){
 		rewind(newtime*1000);
 	}
 	else{
 		forward(newtime*1000);
 	}
-	timeline.addEventListener("click", timelineClicked,false);
+
+	//timeline.addEventListener("click", timelineClicked,false);
+	ifpaused = false;
 }
 
 function forward(time){
@@ -850,7 +857,7 @@ function forward(time){
 }
 
 function rewind(time){
-	delay += time;
+	//delay += time;
     for (var k in canvas_dict) {
 		canvas_dict[k].getContext('2d').clearRect(0,0,canvas_width,canvas_height);
     }
@@ -858,7 +865,7 @@ function rewind(time){
 	var i = 0;
 	while(i<playedSavedMovements.length){
 		var curmove = playedSavedMovements[i];
-		if(curmove.t<time){
+		if(curmove['t']<time){
 			updateMovement(curmove);
 		}
 		else{
