@@ -17,13 +17,14 @@
 		<th>
 		  Slides
 		  <ul>
-			<li><button id="recordButton" onclick="change_slide(1)" >Next Slide</button></li>
-			<li><button id="recordButton" onclick="change_slide(-1)" >Previous Slide</button></li>
+			<li><button id="nextSlide" onclick="change_slide(1)" >Next Slide</button></li>
+			<li><button id="previousSlide" onclick="change_slide(-1)" >Previous Slide</button></li>
 		  </ul>
 		  <div class="scrollable">
 			<ol id="slides_list">
 			</ol>
-			<button onclick="new_slide();"><img src="res/images/add.png" style="width:50px;height:60px;"></button> <br>
+
+			<button onclick="new_slide();">Add New Slide</button> <br>
 		  </div>
 		</th>
 
@@ -40,7 +41,8 @@
 			<li><input type="button" style="background-color:#475F94"  onclick="change_color('#475F94')"></li>
 			<li><input type="button" style="background-color:#FDDC5C"  onclick="change_color('#FDDC5C')"></li>
 			<li><input type="button" style="background-color:#FA4224"  onclick="change_color('#FA4224')"></li>
-			<li><input type="button" onclick="change_color('#FFFFFF')" value="Erasor"></li>
+			<li><input type="button" onclick="setEraser()" value="Eraser"></li>
+			<li><input type="button" onclick="setPen()" value="Pen"></li>
 		  </ul>
 		</th>
 
@@ -48,28 +50,28 @@
 
 	  <tr>
 		<th>
-		  <input type="file" id="upload_slides" name="files[]" multiple />
+		  <input type="file" id="upload_slides" name="files[]" accept="image/*,.pdf" />
 		</th>
 
 		<th>
 		  <button id="recordButton" onclick="startRecord()" >Start Record</button>
-		  <button onclick="stop_record()">Stop Record</button>
+		  <button id="pauserecordButton" onclick="pauseRecording()" >Pause Record</button>
 		  <button id="exportPDF" onclick="exportPDF()" >Export As PDF</button>
+		  <p id="recordingTime"><time>00:00:00</time></p>
+		  <p id="issoundRecorded"></p>
 		</th>
 
 		<th>
-			<input type="file" id="upload_recording" name="files[]" multiple />
-			<button id="controlButton" onclick="" ></button>
 
+			<div class="slidecontainer">
+				<input type="range" min="1" max="10" value="3" class="slider" id="pointerWidthRange">
+			  </div>
 
-			<audio id="audio" controls>
-				<source id="source" src="" type="audio/ogg"/>
-			</audio>
-
-
+			<input type="file" id="upload_recording" name="files[]" />
+			
+			<button id="controlButton" class ="controlbutton"  onclick="" ></button>
+			<p id="issoundpresent"></p>
 			<section class="sound-clips">
-
-
 			</section>
 
 		</th>
