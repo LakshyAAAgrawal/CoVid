@@ -35,7 +35,6 @@ var timeline; // timeline
 var timelineWidth;
 // Boolean value so that audio position is updated only when the playhead is released
 var onplayhead = false;
-// Check save feature in chrome
 
 function record_to_movements(entry){
 	if(to_record){
@@ -127,21 +126,21 @@ function startRecord(){
 		.then(stream => {
 			isSoundRecorded = true;
 			document.getElementById('issoundRecorded').innerText = "";
-			
+
 			var options = {
 				audioBitsPerSecond : 32000,
 				mimeType : 'audio/webm;codecs=opus'
 			}
-			
+
 			t0 = performance.now();
-			
+
 			mediaRecorder = new MediaRecorder(stream, options);
 			mediaRecorder.start();
 			const audioChunks = [];
 			mediaRecorder.addEventListener("dataavailable", event => {
 				audioChunks.push(event.data);
 			});
-			
+
 			mediaRecorder.addEventListener("stop", () => {
 				const audioBlob = new Blob(audioChunks, {type : 'audio/webm'});
 				download(audioBlob);
@@ -159,14 +158,10 @@ function stop_record(){
 	var button = document.getElementById("recordButton");
 	button.setAttribute("src", "res/images/start_recording.svg")
 	button.onclick = startRecord;
-
 	document.getElementById('pauserecordButton').style.display = "none";
-
 	to_record = false;
-
 	document.getElementById('recordingTime').style.display = "none";
 	clearTimeout(recordTimeCounter);
-
 	document.getElementById('issoundRecorded').innerText = "";
 
 	if(isSoundRecorded && mediaRecorder){
@@ -196,7 +191,6 @@ function resumeRecording(){
 	to_record = true;
 	mediaRecorder.resume();
 }
-
 
 // Make a zip and download
 function download(audioBlob){
@@ -385,7 +379,6 @@ function change_color(color){
 
 // Called everytime there is a mouse movement and there is a need to draw
 var onPaint = function(){
-
 	var t1 = performance.now();
 	drawPointer(mouse.x/canvas_width, mouse.y/canvas_height);
     record_to_movements({
@@ -408,7 +401,6 @@ var draw_stop = function(){
 };
 
 var draw_start = function(e){
-	var ctx = current_canvas.getContext('2d');
 
 	movePointer(mouse.x/canvas_width, mouse.y/canvas_height);
 
@@ -422,9 +414,8 @@ var draw_start = function(e){
 };
 
 var draw_start_touch = function(e){
-	var ctx = current_canvas.getContext('2d');
-	updateTouchPos(e);
 
+	updateTouchPos(e);
 	movePointer(mouse.x, mouse.y);
 	var t1 = performance.now();
     record_to_movements({
@@ -452,110 +443,7 @@ function movePointer(xCoordinate, yCoordinate){
 	ctx.moveTo(xCoordinate*canvas_width, yCoordinate*canvas_height);
 }
 
-// Get a movement and simulate a particular movement
-function updateMovement(curmove){
-    if (curmove.action == "movePointer"){
-		movePointer.apply(this, curmove.action_param)
-    }else if('action' in curmove &&
-			curmove.action == "create_slide"){
-		new_slide();
-	}else if('action' in curmove &&
-			 curmove.action == "change_slide"){
-		set_current.apply(this, curmove.action_param);
-	}else if('action' in curmove &&
-			 curmove.action == "change_color"){
-		change_color.apply(this, curmove.action_param);
-	}else if('action' in curmove &&
-			 curmove.action == "changePointerWidth"){
-		changePointerWidth.apply(this, curmove.action_param);
-	}else{
-		drawPointer.apply(this, curmove.action_param)
-    }
-}
-
-// To replay the mouse movements
-function replay(){
-    if(savedMovements.length>0 && ifpaused == false){
-		var currentT = performance.now();
-		var temp = currentT - savedt0 - delay;
-		if (savedMovements[0].t < temp){
-			var curmove = savedMovements.shift();
-			playedSavedMovements.push(curmove);
-			updateMovement(curmove);
-		}
-		globalID = requestAnimationFrame(replay);
-	}
-	else if(savedMovements.length == 0 && isSoundinPlayback == false){
-		document.getElementById("issoundpresent").innerHTML = "";
-	}
-}
 ////////////////////////////////////////////////
-
-function readUploadedfile(evt){
-
-	var files = evt.target.files;
-    for (var i = 0, f; f = files[i]; i++) {
-        handleFile(files[i]);
-    }
-}
-
-///// Unpack JSON into the desired format
-function parse_saved_json_to_usable_format(mousemovement){
-	movementJSON = JSON.parse(mousemovement)
-	var movementList = new Array();
-	var tList = movementJSON['t'];
-	var actionList = movementJSON['action'];
-	var actionParamList = movementJSON['action_param'];
-
-	while(tList.length>0){
-		var curmove = {}
-		curmove['t'] = tList.shift();
-		curmove['action'] = actionList.shift();
-		curmove['action_param'] = actionParamList.shift();
-		movementList.push(curmove)
-	}
-
-	return movementList;
-}
-
-function handleFile(f){
-	JSZip.loadAsync(f)
-		.then(function(zip) {
-			zip.forEach(function (relativePath, zipEntry) {
-				if(relativePath == "MouseMovements.txt"){
-					zipEntry.async("string")
-						.then(function (mousemovement) {
-							savedMovements = parse_saved_json_to_usable_format(mousemovement);
-						})
-
-				}else{
-					zipEntry.async("base64")
-						.then(function(zip) {
-
-							var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
-							chunks = [];
-							var audioURL = URL.createObjectURL(blob);
-							isSoundinPlayback = true;
-
-							savedAudio = new Howl({
-								src: [audioURL],
-								format: ['webm']
-							  });
-
-							savedAudio.once('load', function(){
-								duration = savedAudio._duration;
-								document.getElementById('audioplayer').style.display = "inline-block";
-								timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
-							  });
-
-						})
-				}
-			});
-		}, function (e) {
-			console.log(e.message);
-		});
-}
-
 function handleFileSelect(evt){
     var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
@@ -674,6 +562,113 @@ function setPen(){
 }
 */
 
+//////////////////////////////////   Viewer Mode
+
+////// Uploaded Recorded Lecture
+function handleFile(f){
+	JSZip.loadAsync(f)
+		.then(function(zip) {
+			zip.forEach(function (relativePath, zipEntry) {
+				if(relativePath == "MouseMovements.txt"){
+					zipEntry.async("string")
+						.then(function (mousemovement) {
+							savedMovements = parse_saved_json_to_usable_format(mousemovement);
+							document.getElementById('audioplayer').style.display = "block";
+							timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
+						})
+				}else{
+					zipEntry.async("base64")
+						.then(function(zip) {
+							document.getElementById('audioplayer').style.display = "none";
+							var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
+							chunks = [];
+							var audioURL = URL.createObjectURL(blob);
+							isSoundinPlayback = true;
+
+							savedAudio = new Howl({
+								src: [audioURL],
+								format: ['webm']
+							  });
+
+							savedAudio.once('load', function(){
+								duration = savedAudio._duration;
+								document.getElementById('audioplayer').style.display = "block";
+							  });
+
+						})
+				}
+			});
+		}, function (e) {
+			console.log(e.message);
+		});
+}
+
+function readUploadedfile(evt){
+
+	var files = evt.target.files;
+    for (var i = 0, f; f = files[i]; i++) {
+        handleFile(files[i]);
+    }
+}
+
+///// Unpack JSON into the desired format
+function parse_saved_json_to_usable_format(mousemovement){
+	movementJSON = JSON.parse(mousemovement)
+	var movementList = new Array();
+	var tList = movementJSON['t'];
+	var actionList = movementJSON['action'];
+	var actionParamList = movementJSON['action_param'];
+
+	while(tList.length>0){
+		var curmove = {}
+		curmove['t'] = tList.shift();
+		curmove['action'] = actionList.shift();
+		curmove['action_param'] = actionParamList.shift();
+		movementList.push(curmove)
+	}
+	return movementList;
+}
+
+// To replay the mouse movements
+function replay(){
+    if(savedMovements.length>0 && ifpaused == false){
+		var currentT = performance.now();
+		var temp = currentT - savedt0 - delay;
+		if (savedMovements[0].t < temp){
+			var curmove = savedMovements.shift();
+			playedSavedMovements.push(curmove);
+			updateMovement(curmove);
+		}
+		globalID = requestAnimationFrame(replay);
+	}
+	else if(savedMovements.length == 0 && isSoundinPlayback == false){
+		document.getElementById("issoundpresent").innerHTML = "";
+
+	}
+}
+
+// Get a movement and simulate a particular movement
+function updateMovement(curmove){
+    if (curmove.action == "movePointer"){
+		movePointer.apply(this, curmove.action_param)
+    }else if('action' in curmove &&
+			curmove.action == "create_slide"){
+		new_slide();
+	}else if('action' in curmove &&
+			 curmove.action == "change_slide"){
+		set_current.apply(this, curmove.action_param);
+	}else if('action' in curmove &&
+			 curmove.action == "change_color"){
+		change_color.apply(this, curmove.action_param);
+	}else if('action' in curmove &&
+			 curmove.action == "changePointerWidth"){
+		changePointerWidth.apply(this, curmove.action_param);
+	}else{
+		drawPointer.apply(this, curmove.action_param)
+    }
+}
+
+////////////////////////////// Replay Timeline
 // mouseDown EventListener
 function timelineSelected() {
     onplayhead = true;
@@ -686,20 +681,31 @@ function timelineDeselected(event) {
     if (onplayhead == true) {
         moveplayhead(event);
 		window.removeEventListener('mousemove', moveplayhead, true);
-		mouserewindForward(savedAudio.seek(),duration*clickPercent(event));
-        savedAudio.seek(duration*clickPercent(event));
+		if(isSoundinPlayback){
+			mouserewindForward(savedAudio.seek(),duration*clickPercent(event));
+			savedAudio.seek(duration*clickPercent(event));
+		}
+		else{
+			var temp = getCurrenttimeofMouseMovement();
+			mouserewindForward(temp, duration*clickPercent(event));
+		}
+
 
     }
     onplayhead = false;
 }
 
-
-function mouserewindForward(currentTime, newtime){
-	if(currentTime>newtime){
-		rewind(newtime*1000);
+function timelineClicked(event) {
+	moveplayhead(event);
+	console.log("duration",duration);
+	console.log(clickPercent(event));
+	if(isSoundinPlayback){
+		mouserewindForward(savedAudio.seek(),duration*clickPercent(event));
+		savedAudio.seek(duration*clickPercent(event));
 	}
 	else{
-		forward(newtime*1000);
+		var temp = getCurrenttimeofMouseMovement();
+		mouserewindForward(temp, duration*clickPercent(event));
 	}
 }
 
@@ -718,96 +724,73 @@ function moveplayhead(event) {
     }
 }
 
+function getCurrenttimeofMouseMovement(){
+	var temp = performance.now() - savedt0 - delay;
+	return temp/1000;
+}
 // timeUpdate
 // Synchronizes playhead position with current point in audio
 function timeUpdate() {
-    var playPercent = timelineWidth * (savedAudio.seek() / duration);
+	var curTime;
+	if(isSoundinPlayback){
+		curTime = savedAudio.seek();
+	}
+	else{
+		curTime = getCurrenttimeofMouseMovement();
+	}
+
+	var playPercent = timelineWidth * (curTime / duration);
 	playhead.style.marginLeft = playPercent + "px";
 
-    if (savedAudio.seek() == duration) {
-        pButton.className = "";
-        pButton.className = "play";
+	if (curTime >= duration) {
+		pButton.className = "";
+		pButton.className = "play";
+		pButton.addEventListener("click", startReplay);
+		pButton.removeEventListener("click", playPauserecording);
+		savedMovements = playedSavedMovements;
 	}
-	requestAnimationFrame(timeUpdate);
+	else{
+		requestAnimationFrame(timeUpdate);
+	}
 }
-
 
 function timelineupdate() {
 	requestAnimationFrame(timeUpdate);
 }
 
-function syncAudioMouse(){
-	var temp = performance.now() - savedt0 - delay;
-	var currAudio = savedAudio.seek()*1000;
-
-	if(temp!=currAudio){
-		delay = delay + temp - currAudio;
-		console.log(delay);
-	}
-	syncAudioMouseCall();
-}
-
-function syncAudioMouseCall(){
-	setTimeout(syncAudioMouse, 1000);
-}
-
-
-//Play and Pause
 function startReplay() {
-	savedt0 = performance.now();
+	pButton.removeEventListener("click", startReplay);
 	pButton.addEventListener("click", playPauserecording);
-	syncAudioMouseCall();
-	timelineupdate();
-	if (isSoundinPlayback) {
-		savedAudio.play();
-	}
-	else{
-		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
-	}
-	globalID = requestAnimationFrame(replay);
-}
-/*
-
-function startReplay(){
 	savedt0 = performance.now();
-	var button = document.getElementById("controlButton");
-	button.onclick = pause;
-	button.innerHTML = "Pause";
+	delay = 0;
+	timelineupdate();
+	pButton.className = "pause";
 	if (isSoundinPlayback) {
 		savedAudio.play();
-		savedAudio.addEventListener("ended", function() {
-			var button = document.getElementById("controlButton");
-			button.onclick = "";
-			button.innerHTML = "Recording finished";
-		});
+		syncAudioMouseCall();
 	}
 	else{
+		duration = savedMovements[savedMovements.length - 1]['t']/1000;
 		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
 	}
 	globalID = requestAnimationFrame(replay);
-
 }
-*/
+
 
 function playPauserecording() {
-    if (savedAudio.playing()) { // pause music
-		savedAudio.pause();
+	if (ifpaused) {  // remove pause, add play
+		if (isSoundinPlayback) { savedAudio.play();}
+        pButton.className = "";
+		pButton.className = "pause";
+		ifpaused = false;
+		globalID = requestAnimationFrame(replay);
+	}
+	else { // pause music
+		if (isSoundinPlayback) { savedAudio.pause();}
 		ifpaused = true;
-		pauseTime = performance.now();
-		//clearTimeout(isTimelineUpdated);
         pButton.className = "";
 		pButton.className = "play";
 	}
-	else {  // remove pause, add play
-		//timelineupdate();
-        savedAudio.play();
-        pButton.className = "";
-		pButton.className = "pause";
-
-		delay +=  performance.now() - pauseTime;
-		ifpaused = false;
-		globalID = requestAnimationFrame(replay);
-    }
 }
 
 function getPosition(el) {
@@ -818,26 +801,17 @@ function clickPercent(event) {
     return (event.clientX - getPosition(timeline)) / timelineWidth;
 }
 
-/*
-function pause(){
-	ifpaused = true;
-	pauseTime = performance.now();
-	var button = document.getElementById("controlButton");
-	if (isSoundinPlayback) {savedAudio.pause();}
-	button.onclick = unpause;
-	button.innerHTML = 'Play';
-}
 
-function unpause(){
-	delay +=  performance.now() - pauseTime;
-	ifpaused = false;
-	var button = document.getElementById("controlButton");
-	if (isSoundinPlayback) {savedAudio.play();}
-	button.onclick = pause;
-	button.innerHTML = "Pause";
-	globalID = requestAnimationFrame(replay);
+function mouserewindForward(currentTime, newtime){
+	timeline.removeEventListener("click", timelineClicked,false);
+	if(currentTime>newtime){
+		rewind(newtime*1000);
+	}
+	else{
+		forward(newtime*1000);
+	}
+	timeline.addEventListener("click", timelineClicked,false);
 }
-*/
 
 function forward(time){
 	delay -= time;
@@ -875,5 +849,19 @@ function rewind(time){
 	while(i!= playedSavedMovements.length){
 		savedMovements.unshift(playedSavedMovements.pop());
 	}
+}
 
+function syncAudioMouse(){
+	var temp = performance.now() - savedt0 - delay;
+	var currAudio = savedAudio.seek()*1000;
+
+	if(temp!=currAudio){
+		delay = delay + temp - currAudio;
+		console.log(delay);
+	}
+	syncAudioMouseCall();
+}
+
+function syncAudioMouseCall(){
+	setTimeout(syncAudioMouse, 1000);
 }

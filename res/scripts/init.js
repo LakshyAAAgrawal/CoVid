@@ -25,19 +25,11 @@ function init(){
 	timeline = document.getElementById('timeline'); // timeline
     pButton.addEventListener("click", startReplay);
 
-    // timeupdate event listener
-    // makes timeline clickable
-    timeline.addEventListener("click", function(event) {
-        moveplayhead(event);
-        console.log("duration",duration);
-        console.log(clickPercent(event));
-        mouserewindForward(savedAudio.seek(),duration*clickPercent(event));
-        savedAudio.seek(duration*clickPercent(event));
-    }, false);
 
-    // makes playhead draggable
+    timeline.addEventListener("click", timelineClicked,false);
     playhead.addEventListener('mousedown', timelineSelected, false);
     window.addEventListener('mouseup', timelineDeselected, false);
+
 }
 
 init();
