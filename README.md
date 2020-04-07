@@ -34,6 +34,6 @@ Many students in our university were facing issues with attending online lecture
 <img src="./res/images/import_base_pdf.svg" width="20">:   Upload base lecture PDF
 
 #### How to upload and play recording?
-1. Upload the base PDF(PDF with no pen marking) of slides. Use ![]<img src="./res/images/import_base_pdf.svg" width="15">
+1. Upload the base PDF(PDF with no pen marking) of slides. Use <img src="./res/images/import_base_pdf.svg" width="15">
 2. Upload Lecture content zip. Use  <img src="./res/images/import_lecture_content.svg" width="20">
 3. Play/pause or rewind
