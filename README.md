@@ -26,4 +26,4 @@ We worked to ensure that the instructors need not change their workflow and henc
 * Obtain the recorded file along with the base slides.
 * Import the base slides(if any)(<img src="./res/images/import_base_pdf.svg" width="20">).
 * Import the recorded session file(<img src="./res/images/import_lecture_content.svg" width="20">).
-* Click on Play button(<img src="http://www.alexkatz.me/codepen/img/play.png" width="20">). Pause(<img src="http://www.alexkatz.me/codepen/img/pause.png" width="20">) option can be used during playback.
+* Click on Play button(<img src="./res/images/play.png" width="20">). Pause(<img src="./res/images/pause.png" width="20">) option can be used during playback.
