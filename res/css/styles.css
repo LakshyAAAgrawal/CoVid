@@ -21,6 +21,15 @@ body {
 	box-shadow: 0 15px 15px rgba(0, 0, 0, 0.3);
 }
 
+#logo_img{
+	position: fixed;
+	top: 20px;
+	height: 18.77px;
+	width: 50px;
+	left: 50%;
+	margin-left: -(50/2)px;
+}
+
 #pointerWidthRange{
 	width:64px;
 	margin: 5px;
@@ -54,9 +63,6 @@ body {
 }
 .replay_control{
 	display: inline-block;
-}
-
-#audioplayer{
 }
 
 .color_button{
@@ -105,13 +111,13 @@ body {
 	display: flex;
 	bottom: 0;
 	background: #6B7C85;
-	left: 100px;
-	right: 100px;
+	left: 00px;
+	right: 00px;
 	height: 75px;
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;
-	border-radius: 35px;
+	border-radius: 20px;
 	max-height: 75px;
 }
 
@@ -142,6 +148,7 @@ body {
 	justify-content: center;
 	border-radius: 35px;
 	background: white;
+	margin-left: auto;
 }
 .controlbutton{
     display: none;
@@ -229,4 +236,37 @@ body {
     margin-top: 1px;
     background: rgba(0, 0, 0,1);
 
+}
+#issoundpresent {
+    float: right;
+    align-content: center;
+    margin-top: 30px;
+    margin-left: 20px;
+	font-weight: bold;
+}
+#issoundRecorded {
+	margin: 30px;
+	float: right;
+	font-weight: bold;
+}
+
+#recordingTime{
+	margin-top: 30px;
+	float: right;
+	font-weight: bold;
+}
+
+#credits{
+	position: relative;
+	align-self: flex-end;
+	margin-left: auto;
+	font-weight: bold;
+	background-color: #6B7C85;
+	border-radius: 20px;
+	margin-right: 20px;
+	margin-bottom: 5px;
+	
+}
+#credits a{
+	color: #00CC99;
 }

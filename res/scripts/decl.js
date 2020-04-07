@@ -26,7 +26,7 @@ var isSoundRecorded = true;
 var isSoundinPlayback = false;   // true when sound is present is uploaded file
 var current_mode = "view";
 var isTimelineUpdated;
-
+var isrecordingMode = true;   /// Default is recording
 var duration;
 var pButton; // play button
 var playhead ; // playhead
@@ -35,6 +35,7 @@ var timeline; // timeline
 var timelineWidth;
 // Boolean value so that audio position is updated only when the playhead is released
 var onplayhead = false;
+
 
 function record_to_movements(entry){
 	if(to_record){
@@ -51,6 +52,11 @@ function change_mode(target){
 		current_mode = "view";
 		$("#view_mode_button").css("background", "blue");
 		$("#rec_mode_button").css("background", "white");
+		$(".bottom_bar").css("right", "20px");
+		$(".bottom_bar").css("left", "20px");
+		isrecordingMode = false;
+		removeEventFromcanvas(current_canvas);
+
 	}else if(target === "rec"){
 		$(".view").css("display", "none");
 		$(".rec").css("display", "block");
@@ -59,6 +65,10 @@ function change_mode(target){
 		current_mode = "rec";
 		$("#rec_mode_button").css("background", "blue");
 		$("#view_mode_button").css("background", "white");
+		$(".bottom_bar").css("right", "80px");
+		$(".bottom_bar").css("left", "80px");
+		isrecordingMode = true;
+		addEventListenertoCanvas(current_canvas);
 	}
 	reset_canvas_dimension();
 }
@@ -298,37 +308,24 @@ function new_slide(){
 }
 
 //Sets the current slide to a specific slide id
-function set_current(slide_id){
-	var strokeStyle = '#00CC99';
-	var lineWidth = 3;
-	if(typeof current_canvas !== 'undefined'){
 
-		ctx = current_canvas.getContext('2d');   /// To carry forward the same linewidth and
-		strokeStyle = ctx.strokeStyle;			 /// color to next slide when the slide is changed
-		lineWidth = ctx.lineWidth
+function removeEventFromcanvas(current_canvas){
+	current_canvas.removeEventListener('mousemove', updateMousePos, false);
+	current_canvas.removeEventListener('mousedown', draw_start, false);
+	current_canvas.removeEventListener('mouseup', draw_stop, false);
 
-		current_canvas.style.display = 'none';
-		current_canvas.removeEventListener('mousemove', updateMousePos, false);
-		current_canvas.removeEventListener('mousedown', draw_start, false);
-		current_canvas.removeEventListener('mouseup', draw_stop, false);
+	current_canvas.removeEventListener('touchmove', updateTouchPos, false);
+	current_canvas.removeEventListener('touchstart', draw_start_touch, false);
+	current_canvas.removeEventListener('touchend', draw_stop, false);
+	current_canvas.removeEventListener('touchcancel', draw_stop, false);
 
-		current_canvas.removeEventListener('touchmove', updateTouchPos, false);
-		current_canvas.removeEventListener('touchstart', draw_start_touch, false);
-		current_canvas.removeEventListener('touchend', draw_stop, false);
-		current_canvas.removeEventListener('touchcancel', draw_stop, false);
+	current_canvas.removeEventListener('touchmove', prevent_touch_move_callback, false);
+	current_canvas.removeEventListener('touchstart', prevent_touch_move_callback, false);
+	current_canvas.removeEventListener('touchend', prevent_touch_move_callback, false);
+	current_canvas.removeEventListener('touchcancel', prevent_touch_move_callback, false);
+}
 
-		current_canvas.removeEventListener('touchmove', prevent_touch_move_callback, false);
-		current_canvas.removeEventListener('touchstart', prevent_touch_move_callback, false);
-		current_canvas.removeEventListener('touchend', prevent_touch_move_callback, false);
-		current_canvas.removeEventListener('touchcancel', prevent_touch_move_callback, false);
-	}
-
-	canvas_dict[slide_id].style.display = 'block';
-	current_canvas = canvas_dict[slide_id];
-	ctx = current_canvas.getContext('2d');
-	ctx.lineWidth = lineWidth;
-	ctx.strokeStyle = strokeStyle;
-	reset_canvas_dimension();
+function addEventListenertoCanvas(current_canvas){
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
@@ -342,6 +339,34 @@ function set_current(slide_id){
 	current_canvas.addEventListener('touchstart', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchend', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchcancel', prevent_touch_move_callback, false);
+}
+
+
+function set_current(slide_id){
+	var strokeStyle = '#00CC99';
+	var lineWidth = 3;
+	if(typeof current_canvas !== 'undefined'){
+
+		ctx = current_canvas.getContext('2d');   /// To carry forward the same linewidth and
+		strokeStyle = ctx.strokeStyle;			 /// color to next slide when the slide is changed
+		lineWidth = ctx.lineWidth
+
+		current_canvas.style.display = 'none';
+		if(isrecordingMode){
+			removeEventFromcanvas(current_canvas);
+		}
+
+	}
+
+	canvas_dict[slide_id].style.display = 'block';
+	current_canvas = canvas_dict[slide_id];
+	ctx = current_canvas.getContext('2d');
+	ctx.lineWidth = lineWidth;
+	ctx.strokeStyle = strokeStyle;
+	reset_canvas_dimension();
+	if(isrecordingMode){
+		addEventListenertoCanvas(current_canvas);
+	}
 
 	//setPen();
 	var t1 = performance.now();
@@ -573,7 +598,8 @@ function handleFile(f){
 					zipEntry.async("string")
 						.then(function (mousemovement) {
 							savedMovements = parse_saved_json_to_usable_format(mousemovement);
-							document.getElementById('audioplayer').style.display = "block";
+
+							document.getElementById('audioplayer').style.display = "inline-block";
 							timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
 						})
 				}else{
@@ -592,7 +618,7 @@ function handleFile(f){
 
 							savedAudio.once('load', function(){
 								duration = savedAudio._duration;
-								document.getElementById('audioplayer').style.display = "block";
+								document.getElementById('audioplayer').style.display = "inline-block";
 							  });
 
 						})
@@ -771,7 +797,7 @@ function startReplay() {
 	}
 	else{
 		duration = savedMovements[savedMovements.length - 1]['t']/1000;
-		document.getElementById("issoundpresent").innerHTML = "Sound not present in uploaded file";
+		document.getElementById("issoundpresent").innerHTML = "Sound not present";
 	}
 	globalID = requestAnimationFrame(replay);
 }
@@ -803,14 +829,17 @@ function clickPercent(event) {
 
 
 function mouserewindForward(currentTime, newtime){
-	timeline.removeEventListener("click", timelineClicked,false);
+	//timeline.removeEventListener("click", timelineClicked,false);
+	ifpaused = true;
 	if(currentTime>newtime){
 		rewind(newtime*1000);
 	}
 	else{
 		forward(newtime*1000);
 	}
-	timeline.addEventListener("click", timelineClicked,false);
+
+	//timeline.addEventListener("click", timelineClicked,false);
+	ifpaused = false;
 }
 
 function forward(time){
@@ -830,7 +859,7 @@ function forward(time){
 }
 
 function rewind(time){
-	delay += time;
+	//delay += time;
     for (var k in canvas_dict) {
 		canvas_dict[k].getContext('2d').clearRect(0,0,canvas_width,canvas_height);
     }
@@ -838,7 +867,7 @@ function rewind(time){
 	var i = 0;
 	while(i<playedSavedMovements.length){
 		var curmove = playedSavedMovements[i];
-		if(curmove.t<time){
+		if(curmove['t']<time){
 			updateMovement(curmove);
 		}
 		else{
@@ -857,7 +886,7 @@ function syncAudioMouse(){
 
 	if(temp!=currAudio){
 		delay = delay + temp - currAudio;
-		console.log(delay);
+		console.log("delay",delay);
 	}
 	syncAudioMouseCall();
 }
