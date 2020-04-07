@@ -1,9 +1,15 @@
-
 # CoVid
 ## Aim
 To provide an environment for easy recording of university lectures and presentations, with a priority to reducing the recorded session file size.
 
 Many students in our university face issues with attending online lectures(during the Covid pandemic and otherwise), mainly due to poor internet connectivity. They were not even able to download the large recorded lecture files. Through CoVid(Co - Video), we aim to reduce the recorded lecture file size. People even with bad internet coverage are able to download the small files easily and view the lecture recordings.
+
+CoVid is a complete suite for conducting live lectures(paired with Google Meet/Zoom/Other video conferencing software) along with support for recording the lectures in as small file as possible. Currently, a 30-minute long lecture presentation can be recorded in a file size of 8.7 MB including audio, whereas a google meet recorded lecture would occupy a file size of roughly 160 MB.
+We worked to ensure that the instructors need not change their workflow and hence, the software provides the following features:
+1. Completely web browser-based - No software installation
+2. Compatible with existing live streaming services(like Google Meet)
+3. Support for importing base lectures(as PDF or images), which can be drawn upon during a recording session.
+4. Support for touch devices.
 
 ## Usage
 ### For recording
