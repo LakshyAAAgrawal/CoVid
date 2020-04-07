@@ -21,6 +21,15 @@ body {
 	box-shadow: 0 15px 15px rgba(0, 0, 0, 0.3);
 }
 
+#logo_img{
+	position: fixed;
+	top: 20px;
+	height: 18.77px;
+	width: 50px;
+	left: 50%;
+	margin-left: -(50/2)px;
+}
+
 #pointerWidthRange{
 	width:64px;
 	margin: 5px;
@@ -256,4 +265,8 @@ body {
 	border-radius: 20px;
 	margin-right: 20px;
 	margin-bottom: 5px;
+	
+}
+#credits a{
+	color: #00CC99;
 }

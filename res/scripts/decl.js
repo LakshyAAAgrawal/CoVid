@@ -36,6 +36,7 @@ var timelineWidth;
 // Boolean value so that audio position is updated only when the playhead is released
 var onplayhead = false;
 
+
 function record_to_movements(entry){
 	if(to_record){
 		movements.push(entry);
@@ -597,6 +598,7 @@ function handleFile(f){
 					zipEntry.async("string")
 						.then(function (mousemovement) {
 							savedMovements = parse_saved_json_to_usable_format(mousemovement);
+
 							document.getElementById('audioplayer').style.display = "inline-block";
 							timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
 						})

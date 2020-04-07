@@ -11,47 +11,47 @@
 	<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 	<link rel="stylesheet" href="res/css/styles.css">
   </head>
-
+  
   <body>
-
-
+	
+	
 	<div class="bottom_bar">
-		<div class="mode_toggle">
-		  <img id="view_mode_button" onclick="change_mode('view')" title="Change to view mode" src="res/images/view-mode-button.svg" class="mode_toggle_color_button">View/Record</img>
-		  <img id="rec_mode_button" onclick="change_mode('rec')" title="Change to record mode" src="res/images/record-mode-button.svg" class="mode_toggle_color_button"></img>
-		</div>
-
-		<div class="import_doc rec view">
-		  <input type="file" id="upload_slides"  name="files[]" accept="image/*,.pdf" src="res/images/import_base_pdf.svg" style="display:none;"/>
-		  <img onclick="$('#upload_slides').click();" title="Import base PDF" src="res/images/import_base_pdf.svg" class="mode_toggle_color_button"></img>
-		</div>
-
-		<div class="replay_control view">
-		  <input type="file" id="upload_recording" name="files[]" style="display:none;"/>
-		  <img onclick="$('#upload_recording').click();" title="Upload lecture zip" src="res/images/import_lecture_content.svg" class="mode_toggle_color_button"></img>
-		  <div id="audioplayer">
-			<button id="pButton" class="play"></button>
-			<div id="timeline">
-			  <div id="playhead"></div>
-			</div>
-		  </div>
-		  <div id="issoundpresent"></div>
-		</div>
-
-		<div class="export_doc rec">
-		  <img id="exportPDF" onclick="exportPDF()" title="Export as PDF" src="res/images/export_pdf.png" class="mode_toggle_color_button"></img>
-		</div>
-
-		<div class="record_control rec">
-		  <img id="recordButton" onclick="startRecord()" title="Start/Stop Recording" src="res/images/start_recording.svg" class="mode_toggle_color_button"></img>
-		  <img id="pauserecordButton" onclick="pauseRecording()" title="Pause/Resume Recording" src="res/images/pause_recording.png" class="mode_toggle_color_button" style="display: none;"></img>
-		  <div id="recordingTime" title="Recording Time" ><time>00:00:00</time></div>
-		  <div id="issoundRecorded" style="display: inline-block;"></div>
-		</div>
-		<div id="credits">Made by Archit and Lakshya</div>
-
+	  <div class="mode_toggle">
+		<img id="view_mode_button" onclick="change_mode('view')" title="Change to view mode" src="res/images/view-mode-button.svg" class="mode_toggle_color_button">View/Record</img>
+		<img id="rec_mode_button" onclick="change_mode('rec')" title="Change to record mode" src="res/images/record-mode-button.svg" class="mode_toggle_color_button"></img>
 	  </div>
-
+	  
+	  <div class="import_doc rec view">
+		<input type="file" id="upload_slides"  name="files[]" accept="image/*,.pdf" src="res/images/import_base_pdf.svg" style="display:none;"/>
+		<img onclick="$('#upload_slides').click();" title="Import base PDF" src="res/images/import_base_pdf.svg" class="mode_toggle_color_button"></img>
+	  </div>
+	  
+	  <div class="replay_control view">
+		<input type="file" id="upload_recording" name="files[]" style="display:none;"/>
+		<img onclick="$('#upload_recording').click();" title="Upload lecture zip" src="res/images/import_lecture_content.svg" class="mode_toggle_color_button"></img>
+		<div id="audioplayer">
+		  <button id="pButton" class="play"></button>
+		  <div id="timeline">
+			<div id="playhead"></div>
+		  </div>
+		</div>
+		<div id="issoundpresent"></div>
+	  </div>
+	  
+	  <div class="export_doc rec">
+		<img id="exportPDF" onclick="exportPDF()" title="Export as PDF" src="res/images/export_pdf.png" class="mode_toggle_color_button"></img>
+	  </div>
+	  
+	  <div class="record_control rec">
+		<img id="recordButton" onclick="startRecord()" title="Start/Stop Recording" src="res/images/start_recording.svg" class="mode_toggle_color_button"></img>
+		<img id="pauserecordButton" onclick="pauseRecording()" title="Pause/Resume Recording" src="res/images/pause_recording.png" class="mode_toggle_color_button" style="display: none;"></img>
+		<div id="recordingTime" title="Recording Time" ><time>00:00:00</time></div>
+		<div id="issoundRecorded" style="display: inline-block;"></div>
+	  </div>
+	  <div id="credits">Developed by <a href="https://github.com/nahimilega/">Archit</a> and <a href="https://github.com/LakshyAAAgrawal/">Lakshya</a></div>
+	  
+	</div>
+	
 	<div class="left_bar">
 	  <div class="slide_controls rec">
 		<div class="slide_buttons">
@@ -67,13 +67,13 @@
 		</div>
 	  </div>
 	</div>
-
+	
 	<div class="right_bar">
-		<div class="draw_controls rec scrollable">
-		  <input class="color_button" type="button" style="background-color:#000000"  onclick="change_color('#000000')">
-		  <input class="color_button" type="button" style="background-color:#00CC99"  onclick="change_color('#00CC99')">
-		  <input class="color_button" type="button" style="background-color:#cc1f00"  onclick="change_color('#cc1f00')">
-		  <input class="color_button" type="button" style="background-color:#00cc25"  onclick="change_color('#00cc25')">
+	  <div class="draw_controls rec scrollable">
+		<input class="color_button" type="button" style="background-color:#000000"  onclick="change_color('#000000')">
+		<input class="color_button" type="button" style="background-color:#00CC99"  onclick="change_color('#00CC99')">
+		<input class="color_button" type="button" style="background-color:#cc1f00"  onclick="change_color('#cc1f00')">
+		<input class="color_button" type="button" style="background-color:#00cc25"  onclick="change_color('#00cc25')">
 		  <input class="color_button" type="button" style="background-color:#475F94"  onclick="change_color('#475F94')">
 		  <input class="color_button" type="button" style="background-color:#FDDC5C"  onclick="change_color('#FDDC5C')">
 		  <input class="color_button" type="button" style="background-color:#FA4224"  onclick="change_color('#FA4224')">
@@ -81,13 +81,13 @@
 		  <div class="slidecontainer">
 			<input type="range" min="1" max="10" value="3" width=75px class="slider" id="pointerWidthRange">
 		  </div>
-		</div>
 	  </div>
-
+	</div>
+	<img id="logo_img" src="res/images/covid_logo.png"></img>
 	<div class="canvas rec view" id="canvas_container">
 	  <div id="canvas_list"></div>
 	</div>
-
+	
 	<script src="res/scripts/init.js"></script>
   </body>
 </html>
