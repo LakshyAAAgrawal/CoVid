@@ -1,5 +1,23 @@
 <!DOCTYPE html>
 <html>
+  <!--
+	CoVid - Software suite for Lecture recordings.
+	Copyright (C) 2020 - Lakshya A Agrawal and Archit Agrawal
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+  -->
   <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
@@ -48,7 +66,7 @@
 		<div id="recordingTime" title="Recording Time" ><time>00:00:00</time></div>
 		<div id="issoundRecorded" style="display: inline-block;"></div>
 	  </div>
-	  <div id="credits">Developed by <a href="https://github.com/nahimilega/">Archit</a> and <a href="https://github.com/LakshyAAAgrawal/">Lakshya</a></div>
+	  <div id="credits"><a href="https://github.com/LakshyAAAgrawal/CoVid">Documentation</a><br>Developed by <a href="https://github.com/nahimilega/">Archit</a> and <a href="https://github.com/LakshyAAAgrawal/">Lakshya</a></div>
 	  
 	</div>
 	
@@ -79,7 +97,8 @@
 		  <input class="color_button" type="button" style="background-color:#FA4224"  onclick="change_color('#FA4224')">
 		  <input class="color_button" type="button" onclick="change_color('#FFFFFF')" value="Eraser">
 		  <div class="slidecontainer">
-			<input type="range" min="1" max="10" value="3" width=75px class="slider" id="pointerWidthRange">
+			<label for="pointerWidthrange" style="font: 11px 'Fira Sans', sans-serif; color: white;">Pointer Size</label>
+			<input type="range" min="1" max="10" value="3" width=50px class="slider" id="pointerWidthRange">
 		  </div>
 	  </div>
 	</div>
