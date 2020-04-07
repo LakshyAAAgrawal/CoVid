@@ -439,9 +439,8 @@ var draw_start = function(e){
 };
 
 var draw_start_touch = function(e){
-
 	updateTouchPos(e);
-	movePointer(mouse.x, mouse.y);
+	movePointer(mouse.x/canvas_width, mouse.y/canvas_height);
 	var t1 = performance.now();
     record_to_movements({
 		t:(t1-t0),
