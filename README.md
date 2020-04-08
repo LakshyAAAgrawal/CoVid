@@ -27,3 +27,11 @@ We worked to ensure that the instructors need not change their workflow and henc
 * Import the base slides(if any)(<img src="./res/images/import_base_pdf.svg" width="20">).
 * Import the recorded session file(<img src="./res/images/import_lecture_content.svg" width="20">).
 * Click on Play button(<img src="./res/images/play.png" width="20">). Pause(<img src="./res/images/pause.png" width="20">) option can be used during playback.
+
+### FAQ
+* Will I have to present the same content twice(Once for recording and once for live presentation)?
+  No, CoVid can be used live during an ongoing Google Meet/Video Conferencing in recording mode, and used as a presentation software. At the end of the presentation, the recorded content can be exported and distributed.
+* Will the viewer have to upload the file over the internet to view the lecture content?
+  No, the website loads client side, and the internet can be disconnected once the site has loaded. The viewer needs to just load the file in the browser and will not be sent over the internet.
+* Will a final PDF be available after the lecture session is concluded.
+  Yes, at the end of the lecture session, 2 files are provided, one contains the final state of the lecture slides, as a PDF. The other is an encoding of the entire duration of the lecture, and can be used to view the lecture again.
