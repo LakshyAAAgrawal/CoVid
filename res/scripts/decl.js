@@ -74,6 +74,7 @@ function change_mode(target){
 }
 
 function reset_canvas_dimension(e){
+
 	var max_canvas_width = 0;
 	if(current_mode == "rec"){
 		max_canvas_width = $(window).width() - (2*side_bar_width + 10);
@@ -85,6 +86,10 @@ function reset_canvas_dimension(e){
 	canvas_width = Math.floor(canvas_width * canvas_scale);
 	canvas_height = Math.floor(canvas_height * canvas_scale);
 	if(typeof current_canvas !== 'undefined'){
+		var strokeStyle = current_canvas.getContext('2d').strokeStyle;
+		var lineCap = current_canvas.getContext('2d').lineCap;
+		var lineJoin = current_canvas.getContext('2d').lineJoin;
+		var lineWidth = current_canvas.getContext('2d').lineWidth;
 		var img = new Image();
 		img.src = current_canvas.toDataURL();
 		img.onload = function(){
@@ -93,11 +98,12 @@ function reset_canvas_dimension(e){
 			current_canvas.style.height = canvas_height.toString() + "px";
 			current_canvas.style.width = canvas_width.toString() + "px";
 			current_canvas.getContext('2d').drawImage(img, 0, 0, canvas_width, canvas_height);
+
 			var ctx = current_canvas.getContext('2d');
-			ctx.lineWidth = 3;
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
-			ctx.strokeStyle = '#00CC99';
+			ctx.lineWidth = lineWidth;
+			ctx.lineJoin = lineJoin;
+			ctx.lineCap = lineCap;
+			ctx.strokeStyle = strokeStyle;
 		}
 	}
 }
@@ -106,7 +112,6 @@ function startRecord(){
 	to_record = true;
 	movements = new Array();
 	startRecordingtimer();
-
 	record_to_movements({
 		t: -1,
 		action: "change_slide",
@@ -375,8 +380,6 @@ function set_current(slide_id){
 		action: "change_slide",
 		action_param: [slide_id]
 	});
-
-	$('#debug_elm').text(mouse.x + " " + mouse.y);
 }
 
 function prevent_touch_move_callback(e){
@@ -463,6 +466,7 @@ function updateTouchPos(evt){
 }
 
 function movePointer(xCoordinate, yCoordinate){
+	var ctx = current_canvas.getContext('2d');
 	ctx.beginPath();
 	ctx.moveTo(xCoordinate*canvas_width, yCoordinate*canvas_height);
 }
@@ -688,7 +692,8 @@ function updateMovement(curmove){
 	}else if('action' in curmove &&
 			 curmove.action == "changePointerWidth"){
 		changePointerWidth.apply(this, curmove.action_param);
-	}else{
+	}
+	else{
 		drawPointer.apply(this, curmove.action_param)
     }
 }
@@ -707,8 +712,9 @@ function timelineDeselected(event) {
         moveplayhead(event);
 		window.removeEventListener('mousemove', moveplayhead, true);
 		if(isSoundinPlayback){
-			mouserewindForward(savedAudio.seek(),duration*clickPercent(event));
+			var currTime = savedAudio.seek();
 			savedAudio.seek(duration*clickPercent(event));
+			mouserewindForward(currTime,duration*clickPercent(event));
 		}
 		else{
 			var temp = getCurrenttimeofMouseMovement();
@@ -722,11 +728,10 @@ function timelineDeselected(event) {
 
 function timelineClicked(event) {
 	moveplayhead(event);
-	console.log("duration",duration);
-	console.log(clickPercent(event));
 	if(isSoundinPlayback){
-		mouserewindForward(savedAudio.seek(),duration*clickPercent(event));
+		var currTime = savedAudio.seek();
 		savedAudio.seek(duration*clickPercent(event));
+		mouserewindForward(currTime,duration*clickPercent(event));
 	}
 	else{
 		var temp = getCurrenttimeofMouseMovement();
@@ -828,17 +833,19 @@ function clickPercent(event) {
 
 
 function mouserewindForward(currentTime, newtime){
-	//timeline.removeEventListener("click", timelineClicked,false);
+	timeline.removeEventListener("click", timelineClicked,false);
 	ifpaused = true;
+	savedAudio.pause();
+	syncAudioMouse(true);
 	if(currentTime>newtime){
 		rewind(newtime*1000);
 	}
 	else{
-		forward(newtime*1000);
+		forward((newtime-currentTime)*1000);
 	}
-
-	//timeline.addEventListener("click", timelineClicked,false);
+	timeline.addEventListener("click", timelineClicked,false);
 	ifpaused = false;
+	savedAudio.play();
 }
 
 function forward(time){
@@ -855,39 +862,75 @@ function forward(time){
 			break;
 		}
 	}
+	syncAudioMouse(true);
+}
+
+function clearEverything(){
+	for (var k in canvas_dict) {
+		canvas_dict[k].getContext('2d').clearRect(0,0,canvas_width,canvas_height);
+	}
+}
+
+function switch_canvas_for_replay(new_slide_id){
+	var ctx = current_canvas.getContext('2d');
+	var lineWidth = ctx.lineWidth;
+	var strokeStyle = ctx.lineWidth;
+	current_canvas = canvas_dict[new_slide_id];
+	ctx = current_canvas.getContext('2d');
+	ctx.lineWidth = lineWidth;
+	ctx.strokeStyle = strokeStyle;
 }
 
 function rewind(time){
-	//delay += time;
-    for (var k in canvas_dict) {
-		canvas_dict[k].getContext('2d').clearRect(0,0,canvas_width,canvas_height);
-    }
-
+	clearEverything();
 	var i = 0;
+	var last_slide_to_display;
+	var curCanvasID = current_canvas.id;
 	while(i<playedSavedMovements.length){
+
 		var curmove = playedSavedMovements[i];
 		if(curmove['t']<time){
-			updateMovement(curmove);
+
+			if('action' in curmove &&
+					 curmove.action == "create_slide"){
+						////Nothing
+			}else if('action' in curmove &&
+					 curmove.action == "change_slide"){
+
+						switch_canvas_for_replay(curmove.action_param[0])
+						last_slide_to_display = curmove.action_param[0];
+			}
+			else{
+				updateMovement(curmove);
+			}
 		}
 		else{
 			break;
 		}
 		i += 1;
 	}
+
 	while(i!= playedSavedMovements.length){
-		savedMovements.unshift(playedSavedMovements.pop());
+		var curmove = playedSavedMovements.pop();
+		if (curmove.action !== "create_slide") {savedMovements.unshift(curmove);}
 	}
+
+	switch_canvas_for_replay(curCanvasID);
+	set_current(last_slide_to_display);		// Set the final slide to display
 }
 
-function syncAudioMouse(){
+function syncAudioMouse(toRepet){
 	var temp = performance.now() - savedt0 - delay;
 	var currAudio = savedAudio.seek()*1000;
 
 	if(temp!=currAudio){
 		delay = delay + temp - currAudio;
-		console.log("delay",delay);
 	}
-	syncAudioMouseCall();
+
+	if(toRepet == undefined){
+		syncAudioMouseCall();
+	}
+
 }
 
 function syncAudioMouseCall(){
