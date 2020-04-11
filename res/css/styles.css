@@ -272,3 +272,35 @@ body {
 #credits a{
 	color: #00CC99;
 }
+
+#loading_screen{
+	opacity: 0.5;
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	height: 100%;
+	width: 100%;
+	text-align: center;
+	background: white;
+}
+
+#load_icon{
+	position: relative;
+	margin: auto;
+	top: 50%;
+	transform: translate(0, -60%);
+}
+
+#error_banner{
+	position: fixed;
+	right: 100px;
+	top: 50px;
+	height: 100px;
+	width: 300px;
+	text-align: center;
+	background: red;
+}
+
+#error_msg{
+	color: white;
+}
