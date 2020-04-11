@@ -651,6 +651,7 @@ function handleFile(f){
 					document.getElementById('audioplayer').style.display = "none";
 					zipEntry.async("base64")
 						.then(function(zip) {
+							console.log("ooo");
 							var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
 							chunks = [];
 							var audioURL = URL.createObjectURL(blob);
@@ -658,13 +659,14 @@ function handleFile(f){
 
 							savedAudio = new Howl({
 								src: [audioURL],
-								format: ['webm']
+								format: ['webm'],
+								preload: false
 							  });
 
+							document.getElementById('audioplayer').style.display = "inline-block";
+							timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
 							savedAudio.once('load', function(){
 								duration = savedAudio._duration;
-								document.getElementById('audioplayer').style.display = "inline-block";
-								timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
 							  });
 
 						})
@@ -832,6 +834,7 @@ function timelineupdate() {
 }
 
 function startReplay() {
+	savedAudio.load();
 	pButton.removeEventListener("click", startReplay);
 	pButton.addEventListener("click", playPauserecording);
 	savedt0 = performance.now();
