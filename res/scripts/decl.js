@@ -1,6 +1,7 @@
 // Jai Shree Ram
 
 var current_canvas;
+var current_back_canvas;
 var canvas_dict = {};
 var mouse = {x: 0, y: 0};
 var num_slides = 0;
@@ -90,9 +91,11 @@ function reset_canvas_dimension(e){
 		var lineCap = current_canvas.getContext('2d').lineCap;
 		var lineJoin = current_canvas.getContext('2d').lineJoin;
 		var lineWidth = current_canvas.getContext('2d').lineWidth;
+
 		var img = new Image();
 		img.src = current_canvas.toDataURL();
 		img.onload = function(){
+
 			current_canvas.height = canvas_height;
 			current_canvas.width = canvas_width;
 			current_canvas.style.height = canvas_height.toString() + "px";
@@ -105,6 +108,17 @@ function reset_canvas_dimension(e){
 			ctx.lineCap = lineCap;
 			ctx.strokeStyle = strokeStyle;
 		}
+
+		var backimg = new Image();
+		backimg.src = current_back_canvas.toDataURL();
+		backimg.onload = function(){
+			current_back_canvas.height = canvas_height;
+			current_back_canvas.width = canvas_width;
+			current_back_canvas.style.height = canvas_height.toString() + "px";
+			current_back_canvas.style.width = canvas_width.toString() + "px";
+			current_back_canvas.getContext('2d').drawImage(backimg, 0, 0, canvas_width, canvas_height);
+		}
+
 	}
 }
 
@@ -279,17 +293,32 @@ function startRecordingtimer() {
 
 function new_slide(){
 	var slide_id = (num_slides++);
-	var new_canvas = $('<canvas/>', {"width":canvas_width, "height":canvas_height, "id":slide_id, "class":"canvas_instance"}).get(0);
+
+	var new_canvas = $('<canvas/>', { "id":slide_id, "z-index": 1,"width":canvas_width, "height":canvas_height, "class":"canvas_instance"}).get(0);
+	var new_canvas_back = $('<canvas/>', {"id":"back"+slide_id, "z-index": 0,"width":canvas_width, "height":canvas_height, "class":"canvas_instance"}).get(0);
+
 	$(new_canvas).css("margin", "auto");
-	canvas_dict[slide_id] = new_canvas;
+	$(new_canvas_back).css("margin", "auto");
+
+	canvas_dict[slide_id] = { "front_canvas": new_canvas,
+							"back_canvas": new_canvas_back
+						};
+	$("#canvas_list").append(new_canvas_back);
 	$("#canvas_list").append(new_canvas);
+
+
 	new_canvas.style.display = 'none';
+	new_canvas_back.style.display = 'none';
+
 	var ctx = new_canvas.getContext('2d');
-
-	//ctx.globalCompositeOperation = "source-over";
-
+	ctx.globalCompositeOperation = "source-over";
 	ctx.canvas.width = canvas_width;
 	ctx.canvas.height = canvas_height;
+
+	var back_ctx = new_canvas_back.getContext('2d');
+	back_ctx.canvas.width = canvas_width;
+	back_ctx.canvas.height = canvas_height;
+
 	ctx.lineWidth = 3;
 	ctx.lineJoin = 'round';
 	ctx.lineCap = 'round';
@@ -357,14 +386,23 @@ function set_current(slide_id){
 		lineWidth = ctx.lineWidth
 
 		current_canvas.style.display = 'none';
+		current_back_canvas.style.display = 'none';
+
 		if(isrecordingMode){
 			removeEventFromcanvas(current_canvas);
 		}
-
 	}
 
-	canvas_dict[slide_id].style.display = 'block';
-	current_canvas = canvas_dict[slide_id];
+	//Create slides if not present
+	while(slide_id >= num_slides){
+		new_slide();
+	}
+
+	current_canvas = canvas_dict[slide_id]['front_canvas'];
+	current_back_canvas = canvas_dict[slide_id]['back_canvas'];
+	current_canvas.style.display = 'block';
+	current_back_canvas.style.display = 'block'
+
 	ctx = current_canvas.getContext('2d');
 	ctx.lineWidth = lineWidth;
 	ctx.strokeStyle = strokeStyle;
@@ -373,7 +411,7 @@ function set_current(slide_id){
 		addEventListenertoCanvas(current_canvas);
 	}
 
-	//setPen();
+	setPen();
 	var t1 = performance.now();
 	record_to_movements({
 		t: t1 - t0,
@@ -397,6 +435,7 @@ function change_slide(increment){
 
 function change_color(color){
 	var t1 = performance.now();
+	setPen();
 	record_to_movements({
 		t: t1 - t0,
 		action: "change_color",
@@ -485,7 +524,7 @@ function handleFileSelect(evt){
 					to_record = false;
 					new_slide_id = new_slide();
 					to_record = tmp;
-					canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, canvas_width, canvas_height);
+					canvas_dict[new_slide_id]['back_slide'].getContext('2d').drawImage(image, 0, 0, canvas_width, canvas_height);
 					//document.getElementById(new_slide_id).style.backgroundImage = "url(" + image.src +")";
 				}
 			}, false);
@@ -503,7 +542,7 @@ function handleFileSelect(evt){
 							var scale = 1;
 							var unscaledViewport = page.getViewport({scale: scale});
 							var new_slide_id = new_slide();
-							var canvas = canvas_dict[new_slide_id];
+							var canvas = canvas_dict[new_slide_id]['back_canvas'];
 							var r_scale = Math.min((canvas_height / unscaledViewport.height), (canvas_width / unscaledViewport.width));
 							var viewport = page.getViewport({scale : r_scale});
 							var context = canvas.getContext('2d');
@@ -534,11 +573,16 @@ function handleFileSelect(evt){
 
 function exportPDF(){
 	var doc = new jsPDF('l');
+	//var width = doc.internal.pageSize.getWidth();
+	//var height = doc.internal.pageSize.getHeight();
 	for(var index in canvas_dict){
-		var slideImage = canvas_dict[index].toDataURL('image/png');
-		doc.addImage(slideImage, 'PNG', 0, 0);
-		doc.addPage();
+		doc.addPage(canvas_width,canvas_height);
+		canvas_dict[index]['back_canvas'].getContext('2d').drawImage(canvas_dict[index]['front_canvas'], 0, 0, canvas_width, canvas_height);
+		var slideImage = canvas_dict[index]['back_canvas'].toDataURL('image/jpeg',1);
+		doc.addImage(slideImage, 'JPEG',0,0,canvas_width, canvas_height);
+
 	}
+
 	doc.save('LecturePDF.pdf');
 }
 
@@ -579,8 +623,7 @@ window.onbeforeunload = function() {
 	return "Eak bar punha vichar kare"
 }
 
-/*
-For eraser extension
+///For eraser extension
 function setEraser(){
 	current_canvas.getContext("2d").globalCompositeOperation = "destination-out";
 }
@@ -588,7 +631,7 @@ function setEraser(){
 function setPen(){
 	current_canvas.getContext("2d").globalCompositeOperation = "source-over";
 }
-*/
+
 
 //////////////////////////////////   Viewer Mode
 
@@ -849,7 +892,7 @@ function mouserewindForward(currentTime, newtime){
 }
 
 function forward(time){
-	delay -= time;
+	//delay -= time;
 	while(savedMovements.length>0){
 		var currentT = performance.now();
 		var temp = currentT - savedt0 - delay;
@@ -862,12 +905,11 @@ function forward(time){
 			break;
 		}
 	}
-	syncAudioMouse(true);
 }
 
 function clearEverything(){
 	for (var k in canvas_dict) {
-		canvas_dict[k].getContext('2d').clearRect(0,0,canvas_width,canvas_height);
+		canvas_dict[k]['front_canvas'].getContext('2d').clearRect(0,0,canvas_width,canvas_height);
 	}
 }
 
@@ -875,7 +917,7 @@ function switch_canvas_for_replay(new_slide_id){
 	var ctx = current_canvas.getContext('2d');
 	var lineWidth = ctx.lineWidth;
 	var strokeStyle = ctx.lineWidth;
-	current_canvas = canvas_dict[new_slide_id];
+	current_canvas = canvas_dict[new_slide_id]['front_canvas'];
 	ctx = current_canvas.getContext('2d');
 	ctx.lineWidth = lineWidth;
 	ctx.strokeStyle = strokeStyle;

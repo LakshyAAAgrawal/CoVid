@@ -19,6 +19,9 @@ body {
 	border-style: inset;
 	border: solid 5pt #F10C45;
 	box-shadow: 0 15px 15px rgba(0, 0, 0, 0.3);
+	position: absolute;
+	left: 0;
+	right: 0;
 }
 
 #logo_img{
@@ -160,7 +163,7 @@ body {
 
 .slidecontainer {
     width: 100%; /* Width of the outside container */
-	text-align: center; 
+	text-align: center;
 }
 
   /* The slider itself */
