@@ -36,11 +36,28 @@ var timelineWidth;
 // Boolean value so that audio position is updated only when the playhead is released
 var onplayhead = false;
 
+function hide_error(){
+	$("#error_banner").css("display", "none");
+}
+
+function display_error(message){
+	$("#error_msg").html(message);
+	$("#error_banner").css("display", "block");
+	setTimeout(hide_error, 2500);
+}
 
 function record_to_movements(entry){
 	if(to_record){
 		movements.push(entry);
 	}
+}
+
+function display_loading_screen(){
+	$("#loading_screen").css("display", "block");
+}
+
+function hide_loading_screen(){
+	$("#loading_screen").css("display", "none");
 }
 
 function change_mode(target){
@@ -174,6 +191,8 @@ function stop_record(){
 	clearTimeout(recordTimeCounter);
 	document.getElementById('issoundRecorded').innerText = "";
 
+	display_loading_screen();
+	
 	if(isSoundRecorded && mediaRecorder){
 		mediaRecorder.stop();
 	}
@@ -212,13 +231,15 @@ function download(audioBlob){
 		zip.file("Audio.webm", audioBlob);
 	}
 
-	zip.generateAsync({type:"blob",
-					   compression: "DEFLATE",
-    				   compressionOptions: {
-                            level: 9
-    				   }})
-	.then(function(content) {
+	zip.generateAsync({
+		type:"blob",
+		compression: "DEFLATE",
+    	compressionOptions: {
+            level: 9
+    	}
+	}).then(function(content) {
 		saveAs(content, "LectureContent.zip");
+		hide_loading_screen();
 	});
 }
 
@@ -473,6 +494,7 @@ function handleFileSelect(evt){
     for (var i = 0, f; f = files[i]; i++) {
 		if (f.type.match('image.*')) {
 			var reader = new FileReader();
+			display_loading_screen();
 			reader.addEventListener("load", function(e) {
 				var image = new Image();
 				image.src = e.target.result;
@@ -483,11 +505,13 @@ function handleFileSelect(evt){
 					to_record = tmp;
 					canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, canvas_width, canvas_height);
 					//document.getElementById(new_slide_id).style.backgroundImage = "url(" + image.src +")";
+					hide_loading_screen();
 				}
 			}, false);
 			reader.readAsDataURL(f);
 		}else if(f.type == "application/pdf"){
 			var reader = new FileReader();
+			display_loading_screen();
 			reader.addEventListener("load", function(e) {
 				var pdfData = atob(e.target.result.slice(e.target.result.search(";base64,") + 8));
 				var pdfjsLib = window['pdfjs-dist/build/pdf'];
@@ -509,17 +533,23 @@ function handleFileSelect(evt){
 							};
 							var renderTask = page.render(renderContext);
 							/*
-							For eraser
-							renderTask.promise.then(function () {
+							  For eraser
+							  renderTask.promise.then(function () {
 								/// Convert canvas to image and put it in background to make it non erasable by eraser
 								var imgData = canvas.toDataURL('image/png');
 								canvas.getContext('2d').clearRect(0, 0, canvas_width, canvas_height);
 								document.getElementById(new_slide_id).style.backgroundImage = "url(" + imgData +")";
-							});
+								});
 							*/
 						});
 					}
+					hide_loading_screen();
 				}, function (reason) {
+					//console.log(reason);
+					hide_loading_screen();
+					if(reason.message === "Invalid PDF structure."){
+						display_error("Invalid PDF");
+					}
 				});
 
 			}, false);
@@ -590,46 +620,44 @@ function setPen(){
 
 ////// Uploaded Recorded Lecture
 function handleFile(f){
-	JSZip.loadAsync(f)
-		.then(function(zip) {
-			zip.forEach(function (relativePath, zipEntry) {
-				if(relativePath == "MouseMovements.txt"){
-					zipEntry.async("string")
-						.then(function (mousemovement) {
-							savedMovements = parse_saved_json_to_usable_format(mousemovement);
-
-							document.getElementById('audioplayer').style.display = "inline-block";
-							timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
-						})
-				}else{
-					zipEntry.async("base64")
-						.then(function(zip) {
-							document.getElementById('audioplayer').style.display = "none";
-							var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
-							chunks = [];
-							var audioURL = URL.createObjectURL(blob);
-							isSoundinPlayback = true;
-
-							savedAudio = new Howl({
-								src: [audioURL],
-								format: ['webm']
-							  });
-
-							savedAudio.once('load', function(){
-								duration = savedAudio._duration;
-								document.getElementById('audioplayer').style.display = "inline-block";
-							  });
-
-						})
-				}
-			});
-		}, function (e) {
-			console.log(e.message);
+	display_loading_screen();
+	JSZip.loadAsync(f).then(function(zip){
+		zip.forEach(function (relativePath, zipEntry){
+			if(relativePath == "MouseMovements.txt"){
+				zipEntry.async("string").then(function (mousemovement){
+					savedMovements = parse_saved_json_to_usable_format(mousemovement);
+					document.getElementById('audioplayer').style.display = "inline-block";
+					timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
+				})
+			}else{
+				zipEntry.async("base64").then(function(zip) {
+					document.getElementById('audioplayer').style.display = "none";
+					var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
+					chunks = [];
+					var audioURL = URL.createObjectURL(blob);
+					isSoundinPlayback = true;
+					savedAudio = new Howl({
+						src: [audioURL],
+						format: ['webm']
+					});
+					
+					savedAudio.once('load', function(){
+						duration = savedAudio._duration;
+						document.getElementById('audioplayer').style.display = "inline-block";
+					});
+					
+				})
+			}
 		});
+		hide_loading_screen();
+	}, function (e) {
+		hide_loading_screen();
+		display_error(e.message);
+		console.log(e.message);
+	});
 }
 
 function readUploadedfile(evt){
-
 	var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
         handleFile(files[i]);
