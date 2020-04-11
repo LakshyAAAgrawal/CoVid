@@ -63,6 +63,8 @@ body {
 .record_control{
 	display:flex;
 	flex-direction: column;
+	align-self: flex-start;
+	margin-top: 2px;
 }
 .replay_control{
 	display: inline-block;
@@ -99,7 +101,7 @@ body {
 	width: 45px;
 	height: 45px;
 	margin: 5px;
-	padding: 10px;
+	padding: 5px;
 	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.5);
 	background: #FFFFFF;
 	border-radius: 30px;
@@ -145,7 +147,7 @@ body {
 .mode_toggle{
 	display: flex;
 	height: 69px;
-	margin-right: 40px;
+	margin-right: 10px;
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;
@@ -258,6 +260,7 @@ body {
 	margin-top: 30px;
 	float: right;
 	font-weight: bold;
+	margin-right: 9px;
 }
 
 #credits{

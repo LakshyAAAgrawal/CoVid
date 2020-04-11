@@ -641,17 +641,16 @@ function handleFile(f){
 		.then(function(zip) {
 			zip.forEach(function (relativePath, zipEntry) {
 				if(relativePath == "MouseMovements.txt"){
+					document.getElementById('audioplayer').style.display = "inline-block";
 					zipEntry.async("string")
 						.then(function (mousemovement) {
 							savedMovements = parse_saved_json_to_usable_format(mousemovement);
-
-							document.getElementById('audioplayer').style.display = "inline-block";
 							timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
-						})
+						});
 				}else{
+					document.getElementById('audioplayer').style.display = "none";
 					zipEntry.async("base64")
 						.then(function(zip) {
-							document.getElementById('audioplayer').style.display = "none";
 							var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
 							chunks = [];
 							var audioURL = URL.createObjectURL(blob);
@@ -665,6 +664,7 @@ function handleFile(f){
 							savedAudio.once('load', function(){
 								duration = savedAudio._duration;
 								document.getElementById('audioplayer').style.display = "inline-block";
+								timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
 							  });
 
 						})
@@ -877,9 +877,14 @@ function clickPercent(event) {
 
 function mouserewindForward(currentTime, newtime){
 	timeline.removeEventListener("click", timelineClicked,false);
-	ifpaused = true;
-	savedAudio.pause();
-	syncAudioMouse(true);
+	var toChange = false;
+	if(isSoundinPlayback && ifpaused == false){
+		toChange = true;
+		ifpaused = true;
+		savedAudio.pause();
+		syncAudioMouse(true);
+	}
+
 	if(currentTime>newtime){
 		rewind(newtime*1000);
 	}
@@ -887,8 +892,11 @@ function mouserewindForward(currentTime, newtime){
 		forward((newtime-currentTime)*1000);
 	}
 	timeline.addEventListener("click", timelineClicked,false);
-	ifpaused = false;
-	savedAudio.play();
+	if(toChange){
+		ifpaused = false;
+		savedAudio.play();
+	}
+
 }
 
 function forward(time){
