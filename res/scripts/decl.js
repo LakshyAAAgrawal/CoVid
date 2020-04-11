@@ -559,7 +559,7 @@ function handleFileSelect(evt){
 }
 
 function exportPDF(){
-	var doc = new jsPDF();
+	var doc = new jsPDF('l');
 	for(var index in canvas_dict){
 		var slideImage = canvas_dict[index].toDataURL('image/png');
 		doc.addImage(slideImage, 'PNG', 0, 0);
