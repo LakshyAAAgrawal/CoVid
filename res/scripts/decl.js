@@ -338,6 +338,10 @@ function new_slide(){
 		action: "create_slide",
 		action_param: []
 	});
+
+	back_ctx.globalCompositeOperation = 'destination-over'
+	back_ctx.fillStyle = "white";
+	back_ctx.fillRect(0, 0, canvas_width, canvas_height);
 	return slide_id;
 }
 
@@ -551,15 +555,6 @@ function handleFileSelect(evt){
 								viewport: viewport
 							};
 							var renderTask = page.render(renderContext);
-							/*
-							For eraser
-							renderTask.promise.then(function () {
-								/// Convert canvas to image and put it in background to make it non erasable by eraser
-								var imgData = canvas.toDataURL('image/png');
-								canvas.getContext('2d').clearRect(0, 0, canvas_width, canvas_height);
-								document.getElementById(new_slide_id).style.backgroundImage = "url(" + imgData +")";
-							});
-							*/
 						});
 					}
 				}, function (reason) {
@@ -573,8 +568,6 @@ function handleFileSelect(evt){
 
 function exportPDF(){
 	var doc = new jsPDF('l');
-	//var width = doc.internal.pageSize.getWidth();
-	//var height = doc.internal.pageSize.getHeight();
 	for(var index in canvas_dict){
 		doc.addPage(canvas_width,canvas_height);
 		canvas_dict[index]['back_canvas'].getContext('2d').drawImage(canvas_dict[index]['front_canvas'], 0, 0, canvas_width, canvas_height);
@@ -582,7 +575,7 @@ function exportPDF(){
 		doc.addImage(slideImage, 'JPEG',0,0,canvas_width, canvas_height);
 
 	}
-
+	doc.deletePage(1);
 	doc.save('LecturePDF.pdf');
 }
 
@@ -626,10 +619,22 @@ window.onbeforeunload = function() {
 ///For eraser extension
 function setEraser(){
 	current_canvas.getContext("2d").globalCompositeOperation = "destination-out";
+	var t1 = performance.now();
+	record_to_movements({
+		t: t1 - t0,
+		action: "setEraser",
+		action_param: []
+	});
 }
 
 function setPen(){
 	current_canvas.getContext("2d").globalCompositeOperation = "source-over";
+	var t1 = performance.now();
+	record_to_movements({
+		t: t1 - t0,
+		action: "setPen",
+		action_param: []
+	});
 }
 
 
@@ -737,8 +742,13 @@ function updateMovement(curmove){
 	}else if('action' in curmove &&
 			 curmove.action == "changePointerWidth"){
 		changePointerWidth.apply(this, curmove.action_param);
-	}
-	else{
+	}else if('action' in curmove &&
+			 curmove.action == "setEraser"){
+		setEraser();
+	}else if('action' in curmove &&
+			 curmove.action == "setPen"){
+		setPen();
+	}else{
 		drawPointer.apply(this, curmove.action_param)
     }
 }
