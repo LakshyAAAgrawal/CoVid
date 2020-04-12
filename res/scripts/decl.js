@@ -91,7 +91,7 @@ function reset_canvas_dimension(e){
 		var lineCap = current_canvas.getContext('2d').lineCap;
 		var lineJoin = current_canvas.getContext('2d').lineJoin;
 		var lineWidth = current_canvas.getContext('2d').lineWidth;
-
+		var eraserOrPen = current_canvas.getContext('2d').globalCompositeOperation;
 		var img = new Image();
 		img.src = current_canvas.toDataURL();
 		img.onload = function(){
@@ -107,6 +107,7 @@ function reset_canvas_dimension(e){
 			ctx.lineJoin = lineJoin;
 			ctx.lineCap = lineCap;
 			ctx.strokeStyle = strokeStyle;
+			ctx.globalCompositeOperation = eraserOrPen;
 		}
 
 		var backimg = new Image();
@@ -383,12 +384,13 @@ function addEventListenertoCanvas(current_canvas){
 function set_current(slide_id){
 	var strokeStyle = '#00CC99';
 	var lineWidth = 3;
+	var eraserOrPen = "source-over";
 	if(typeof current_canvas !== 'undefined'){
 
 		ctx = current_canvas.getContext('2d');   /// To carry forward the same linewidth and
 		strokeStyle = ctx.strokeStyle;			 /// color to next slide when the slide is changed
 		lineWidth = ctx.lineWidth
-
+		eraserOrPen = ctx.globalCompositeOperation;
 		current_canvas.style.display = 'none';
 		current_back_canvas.style.display = 'none';
 
@@ -410,12 +412,13 @@ function set_current(slide_id){
 	ctx = current_canvas.getContext('2d');
 	ctx.lineWidth = lineWidth;
 	ctx.strokeStyle = strokeStyle;
+	ctx.globalCompositeOperation = eraserOrPen;
 	reset_canvas_dimension();
 	if(isrecordingMode){
 		addEventListenertoCanvas(current_canvas);
 	}
 
-	setPen();
+	//setPen();
 	var t1 = performance.now();
 	record_to_movements({
 		t: t1 - t0,
@@ -832,11 +835,24 @@ function timeUpdate() {
 		pButton.className = "play";
 		pButton.addEventListener("click", startReplay);
 		pButton.removeEventListener("click", playPauserecording);
-		savedMovements = playedSavedMovements;
+		savedMovements = JSON.parse(JSON.stringify(playedSavedMovements));  // Make a deap copy
+		deactivateTimeline();
 	}
 	else{
 		requestAnimationFrame(timeUpdate);
 	}
+}
+
+function activateTimeline(){
+	timeline.addEventListener("click", timelineClicked,false);
+    playhead.addEventListener('mousedown', timelineSelected, false);
+    window.addEventListener('mouseup', timelineDeselected, false);
+}
+
+function deactivateTimeline(){
+	timeline.removeEventListener("click", timelineClicked,false);
+    playhead.removeEventListener('mousedown', timelineSelected, false);
+    window.removeEventListener('mouseup', timelineDeselected, false);
 }
 
 function timelineupdate() {
@@ -845,6 +861,8 @@ function timelineupdate() {
 
 function startReplay() {
 	savedAudio.load();
+	activateTimeline();
+	playedSavedMovements = new Array();
 	pButton.removeEventListener("click", startReplay);
 	pButton.addEventListener("click", playPauserecording);
 	savedt0 = performance.now();
@@ -908,24 +926,40 @@ function mouserewindForward(currentTime, newtime){
 	if(toChange){
 		ifpaused = false;
 		savedAudio.play();
+		requestAnimationFrame(replay);
 	}
 
 }
 
 function forward(time){
 	//delay -= time;
+	var last_slide_to_display = -1;
+	var curCanvasID = current_canvas.id;
+
 	while(savedMovements.length>0){
 		var currentT = performance.now();
 		var temp = currentT - savedt0 - delay;
 		if (savedMovements[0].t < temp){
 			var curmove = savedMovements.shift();
 			playedSavedMovements.push(curmove);
-			updateMovement(curmove);
+			if('action' in curmove &&
+				 curmove.action == "change_slide"){
+			   switch_canvas_for_replay(curmove.action_param[0])
+			   last_slide_to_display = curmove.action_param[0];
+			}
+			else{
+				updateMovement(curmove);
+			}
 		}
 		else{
 			break;
 		}
 	}
+	if(last_slide_to_display !== -1){
+		switch_canvas_for_replay(curCanvasID);
+		set_current(last_slide_to_display);
+	}
+
 }
 
 function clearEverything(){
@@ -937,11 +971,13 @@ function clearEverything(){
 function switch_canvas_for_replay(new_slide_id){
 	var ctx = current_canvas.getContext('2d');
 	var lineWidth = ctx.lineWidth;
-	var strokeStyle = ctx.lineWidth;
+	var strokeStyle = ctx.strokeStyle;
+	var eraserOrPen = ctx.globalCompositeOperation;
 	current_canvas = canvas_dict[new_slide_id]['front_canvas'];
 	ctx = current_canvas.getContext('2d');
 	ctx.lineWidth = lineWidth;
 	ctx.strokeStyle = strokeStyle;
+	ctx.globalCompositeOperation = eraserOrPen;
 }
 
 function rewind(time){

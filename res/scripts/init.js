@@ -24,10 +24,7 @@ function init(){
 	playhead = document.getElementById('playhead'); // playhead
 	timeline = document.getElementById('timeline'); // timeline
     pButton.addEventListener("click", startReplay);
-    timeline.addEventListener("click", timelineClicked,false);
-    playhead.addEventListener('mousedown', timelineSelected, false);
-    window.addEventListener('mouseup', timelineDeselected, false);
-
+	//activateTimeline();
 }
 
 init();
