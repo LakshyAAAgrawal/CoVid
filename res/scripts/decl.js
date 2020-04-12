@@ -282,7 +282,7 @@ function updateRecordTime() {
             hours++;
         }
     }
-    recordingTime = document.getElementById('recordingTime');
+    var recordingTime = document.getElementById('recordingTime');
     recordingTime.textContent = (hours ? (hours > 9 ? hours : "0" + hours) : "00") + ":" + (minutes ? (minutes > 9 ? minutes : "0" + minutes) : "00") + ":" + (seconds > 9 ? seconds : "0" + seconds);
     startRecordingtimer();
 }
@@ -368,7 +368,7 @@ function set_current(slide_id){
 	var lineWidth = 3;
 	if(typeof current_canvas !== 'undefined'){
 
-		ctx = current_canvas.getContext('2d');   /// To carry forward the same linewidth and
+		var ctx = current_canvas.getContext('2d');   /// To carry forward the same linewidth and
 		strokeStyle = ctx.strokeStyle;			 /// color to next slide when the slide is changed
 		lineWidth = ctx.lineWidth
 
@@ -484,6 +484,7 @@ function updateTouchPos(evt){
 }
 
 function movePointer(xCoordinate, yCoordinate){
+	var ctx = current_canvas.getContext('2d');
 	ctx.beginPath();
 	ctx.moveTo(xCoordinate*canvas_width, yCoordinate*canvas_height);
 }
@@ -501,7 +502,7 @@ function handleFileSelect(evt){
 				image.onload = function(){
 					var tmp = to_record;
 					to_record = false;
-					new_slide_id = new_slide();
+					var new_slide_id = new_slide();
 					to_record = tmp;
 					canvas_dict[new_slide_id].getContext('2d').drawImage(image, 0, 0, canvas_width, canvas_height);
 					//document.getElementById(new_slide_id).style.backgroundImage = "url(" + image.src +")";
@@ -634,7 +635,6 @@ function handleFile(f){
 				zipEntry.async("base64").then(function(zip) {
 					document.getElementById('audioplayer').style.display = "none";
 					var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
-					chunks = [];
 					var audioURL = URL.createObjectURL(blob);
 					isSoundinPlayback = true;
 					savedAudio = new Howl({
@@ -667,7 +667,7 @@ function readUploadedfile(evt){
 
 ///// Unpack JSON into the desired format
 function parse_saved_json_to_usable_format(mousemovement){
-	movementJSON = JSON.parse(mousemovement)
+	var movementJSON = JSON.parse(mousemovement)
 	var movementList = new Array();
 	var tList = movementJSON['t'];
 	var actionList = movementJSON['action'];
