@@ -516,6 +516,7 @@ function handleFileSelect(evt){
 				var pdfData = atob(e.target.result.slice(e.target.result.search(";base64,") + 8));
 				var pdfjsLib = window['pdfjs-dist/build/pdf'];
 				var loadingTask = pdfjsLib.getDocument({data: pdfData});
+				pdfjsLib.GlobalWorkerOptions.workerSrc = 'res/scripts/dist/pdfjs/package/build/pdf.worker.js';
 				loadingTask.promise.then(function(pdf) {
 					var pageNumber = 1;
 					for(var i = 1; i <= pdf.numPages; i++){
