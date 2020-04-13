@@ -757,7 +757,7 @@ function timelineSelected() {
     onplayhead = true;
     window.addEventListener('mousemove', moveplayhead, true);
 }
-
+/*
 // mouseUp EventListener
 // getting input from all mouse clicks
 function timelineDeselected(event) {
@@ -811,6 +811,7 @@ function getCurrenttimeofMouseMovement(){
 	var temp = performance.now() - savedt0 - delay;
 	return temp/1000;
 }
+*/
 // timeUpdate
 // Synchronizes playhead position with current point in audio
 function timeUpdate() {
@@ -837,7 +838,7 @@ function timeUpdate() {
 		requestAnimationFrame(timeUpdate);
 	}
 }
-
+/*
 function activateTimeline(){
 	timeline.addEventListener("click", timelineClicked,false);
     playhead.addEventListener('mousedown', timelineSelected, false);
@@ -849,14 +850,14 @@ function deactivateTimeline(){
     playhead.removeEventListener('mousedown', timelineSelected, false);
     window.removeEventListener('mouseup', timelineDeselected, false);
 }
-
+*/
 function timelineupdate() {
 	requestAnimationFrame(timeUpdate);
 }
 
 function startReplay() {
 	savedAudio.load();
-	activateTimeline();
+	//activateTimeline();
 	playedSavedMovements = new Array();
 	pButton.removeEventListener("click", startReplay);
 	pButton.addEventListener("click", playPauserecording);
@@ -866,7 +867,7 @@ function startReplay() {
 	pButton.className = "pause";
 	if (isSoundinPlayback) {
 		savedAudio.play();
-		syncAudioMouseCall();
+		//syncAudioMouseCall();
 	}
 	else{
 		duration = savedMovements[savedMovements.length - 1]['t']/1000;
@@ -900,7 +901,7 @@ function clickPercent(event) {
     return (event.clientX - getPosition(timeline)) / timelineWidth;
 }
 
-
+/*
 function mouserewindForward(currentTime, newtime){
 	timeline.removeEventListener("click", timelineClicked,false);
 	var toChange = false;
@@ -1033,3 +1034,4 @@ function syncAudioMouse(toRepet){
 function syncAudioMouseCall(){
 	setTimeout(syncAudioMouse, 1000);
 }
+*/
