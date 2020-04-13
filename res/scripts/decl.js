@@ -614,11 +614,6 @@ function changePointerWidth(width){
 	ctx.lineWidth = width;
 }
 
-//// To pop up notification when tab is closed
-window.onbeforeunload = function() {
-	return "Eak bar punha vichar kare"
-}
-
 ///For eraser extension
 function setEraser(){
 	current_canvas.getContext("2d").globalCompositeOperation = "destination-out";
