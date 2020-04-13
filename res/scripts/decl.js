@@ -80,7 +80,7 @@ function change_mode(target){
 		$(".bottom_bar").css("left", "20px");
 		isrecordingMode = false;
 		removeEventFromcanvas(current_canvas);
-		
+
 	}else if(target === "rec"){
 		$(".view").css("display", "none");
 		$(".rec").css("display", "block");
@@ -117,13 +117,13 @@ function reset_canvas_dimension(e){
 		var img = new Image();
 		img.src = current_canvas.toDataURL();
 		img.onload = function(){
-			
+
 			current_canvas.height = canvas_height;
 			current_canvas.width = canvas_width;
 			current_canvas.style.height = canvas_height.toString() + "px";
 			current_canvas.style.width = canvas_width.toString() + "px";
 			current_canvas.getContext('2d').drawImage(img, 0, 0, canvas_width, canvas_height);
-			
+
 			var ctx = current_canvas.getContext('2d');
 			ctx.lineWidth = lineWidth;
 			ctx.lineJoin = lineJoin;
@@ -131,7 +131,7 @@ function reset_canvas_dimension(e){
 			ctx.strokeStyle = strokeStyle;
 			ctx.globalCompositeOperation = eraserOrPen;
 		}
-		
+
 		var backimg = new Image();
 		backimg.src = current_back_canvas.toDataURL();
 		backimg.onload = function(){
@@ -141,7 +141,7 @@ function reset_canvas_dimension(e){
 			current_back_canvas.style.width = canvas_width.toString() + "px";
 			current_back_canvas.getContext('2d').drawImage(backimg, 0, 0, canvas_width, canvas_height);
 		}
-		
+
 	}
 }
 
@@ -159,17 +159,17 @@ function startRecord(){
 		action: "change_color",
 		action_param: [current_canvas.getContext('2d').strokeStyle]
 	});
-	
+
 	record_to_movements({
 		t: -1,
 		action: "changePointerWidth",
 		action_param: [current_canvas.getContext('2d').lineWidth]
 	});
-	
+
 	seconds = 0; minutes = 0; hours = 0;
 	document.getElementById('recordingTime').style.display = "inline-block";
 	document.getElementById('pauserecordButton').style.display = "inline-block";
-	
+
 	var button = document.getElementById("recordButton");
 	button.setAttribute("src", "res/images/stop_recording.svg");
 	button.onclick = stop_record;
@@ -178,21 +178,21 @@ function startRecord(){
 		.then(stream => {
 			isSoundRecorded = true;
 			document.getElementById('issoundRecorded').innerText = "";
-			
+
 			var options = {
 				audioBitsPerSecond : 32000,
 				mimeType : 'audio/webm;codecs=opus'
 			}
-			
+
 			t0 = performance.now();
-			
+
 			mediaRecorder = new MediaRecorder(stream, options);
 			mediaRecorder.start();
 			const audioChunks = [];
 			mediaRecorder.addEventListener("dataavailable", event => {
 				audioChunks.push(event.data);
 			});
-			
+
 			mediaRecorder.addEventListener("stop", () => {
 				const audioBlob = new Blob(audioChunks, {type : 'audio/webm'});
 				download(audioBlob);
@@ -203,7 +203,7 @@ function startRecord(){
 			isSoundRecorded = false;
 			t0 = performance.now();
 		});
-	
+
 }
 
 function stop_record(){
@@ -215,9 +215,9 @@ function stop_record(){
 	document.getElementById('recordingTime').style.display = "none";
 	clearTimeout(recordTimeCounter);
 	document.getElementById('issoundRecorded').innerText = "";
-	
+
 	display_loading_screen();
-	
+
 	if(isSoundRecorded && mediaRecorder){
 		mediaRecorder.stop();
 	}
@@ -230,7 +230,7 @@ function pauseRecording(){
 	var button = document.getElementById("pauserecordButton");
 	button.innerHTML = "Resume Recording";
 	button.onclick = resumeRecording;
-	
+
 	clearTimeout(recordTimeCounter);
 	to_record = false;
 	mediaRecorder.pause();
@@ -240,7 +240,7 @@ function resumeRecording(){
 	var button = document.getElementById("pauserecordButton");
 	button.innerHTML = "Pause Recording";
 	button.onclick = pauseRecording;
-	
+
 	startRecordingtimer();
 	to_record = true;
 	mediaRecorder.resume();
@@ -251,11 +251,11 @@ function download(audioBlob){
 	var zip = new JSZip();
 	var mouseBlob = getMouseBlob();
 	zip.file("MouseMovements.txt",mouseBlob);
-	
+
 	if(typeof audioBlob !== "undefined"){
 		zip.file("Audio.webm", audioBlob);
 	}
-	
+
 	zip.generateAsync({
 		type:"blob",
 		compression: "DEFLATE",
@@ -274,13 +274,13 @@ function convert_json_to_compressed_form(movementList){
 	var t = new Array();
 	var action = new Array();
 	var action_param = new Array();
-	
+
 	movementList.forEach(function (item) {
 		t.push(item['t']);
 		action.push(item['action']);
 		action_param.push(item['action_param']);
 	});
-	
+
 	var movementTosave = {};
 	movementTosave['version'] = '1.0';
 	movementTosave['t'] = t;
@@ -320,32 +320,32 @@ function startRecordingtimer() {
 
 function new_slide(){
 	var slide_id = (num_slides++);
-	
+
 	var new_canvas = $('<canvas/>', { "id":slide_id, "z-index": 1,"width":canvas_width, "height":canvas_height, "class":"canvas_instance"}).get(0);
 	var new_canvas_back = $('<canvas/>', {"id":"back"+slide_id, "z-index": 0,"width":canvas_width, "height":canvas_height, "class":"canvas_instance"}).get(0);
-	
+
 	$(new_canvas).css("margin", "auto");
 	$(new_canvas_back).css("margin", "auto");
-	
+
 	canvas_dict[slide_id] = { "front_canvas": new_canvas,
 							  "back_canvas": new_canvas_back
 							};
 	$("#canvas_list").append(new_canvas_back);
 	$("#canvas_list").append(new_canvas);
-	
-	
+
+
 	new_canvas.style.display = 'none';
 	new_canvas_back.style.display = 'none';
-	
+
 	var ctx = new_canvas.getContext('2d');
 	ctx.globalCompositeOperation = "source-over";
 	ctx.canvas.width = canvas_width;
 	ctx.canvas.height = canvas_height;
-	
+
 	var back_ctx = new_canvas_back.getContext('2d');
 	back_ctx.canvas.width = canvas_width;
 	back_ctx.canvas.height = canvas_height;
-	
+
 	ctx.lineWidth = 3;
 	ctx.lineJoin = 'round';
 	ctx.lineCap = 'round';
@@ -358,14 +358,14 @@ function new_slide(){
 	var li  = $('<li/>');
 	li.append(switch_btn);
 	$("#slides_list").append(li);
-	
+
 	var t1 = performance.now();
 	record_to_movements({
 		t: t1 - t0,
 		action: "create_slide",
 		action_param: []
 	});
-	
+
 	back_ctx.globalCompositeOperation = 'destination-over'
 	back_ctx.fillStyle = "white";
 	back_ctx.fillRect(0, 0, canvas_width, canvas_height);
@@ -378,12 +378,12 @@ function removeEventFromcanvas(current_canvas){
 	current_canvas.removeEventListener('mousemove', updateMousePos, false);
 	current_canvas.removeEventListener('mousedown', draw_start, false);
 	current_canvas.removeEventListener('mouseup', draw_stop, false);
-	
+
 	current_canvas.removeEventListener('touchmove', updateTouchPos, false);
 	current_canvas.removeEventListener('touchstart', draw_start_touch, false);
 	current_canvas.removeEventListener('touchend', draw_stop, false);
 	current_canvas.removeEventListener('touchcancel', draw_stop, false);
-	
+
 	current_canvas.removeEventListener('touchmove', prevent_touch_move_callback, false);
 	current_canvas.removeEventListener('touchstart', prevent_touch_move_callback, false);
 	current_canvas.removeEventListener('touchend', prevent_touch_move_callback, false);
@@ -394,12 +394,12 @@ function addEventListenertoCanvas(current_canvas){
 	current_canvas.addEventListener('mousemove', updateMousePos, false);
 	current_canvas.addEventListener('mousedown', draw_start, false);
 	current_canvas.addEventListener('mouseup', draw_stop, false);
-	
+
 	current_canvas.addEventListener('touchmove', updateTouchPos, false);
 	current_canvas.addEventListener('touchstart', draw_start_touch, false);
 	current_canvas.addEventListener('touchend', draw_stop, false);
 	current_canvas.addEventListener('touchcancel', draw_stop, false);
-	
+
 	current_canvas.addEventListener('touchmove', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchstart', prevent_touch_move_callback, false);
 	current_canvas.addEventListener('touchend', prevent_touch_move_callback, false);
@@ -417,22 +417,22 @@ function set_current(slide_id){
 		eraserOrPen = ctx.globalCompositeOperation;
 		current_canvas.style.display = 'none';
 		current_back_canvas.style.display = 'none';
-		
+
 		if(isrecordingMode){
 			removeEventFromcanvas(current_canvas);
 		}
 	}
-	
+
 	//Create slides if not present
 	while(slide_id >= num_slides){
 		new_slide();
 	}
-	
+
 	current_canvas = canvas_dict[slide_id]['front_canvas'];
 	current_back_canvas = canvas_dict[slide_id]['back_canvas'];
 	current_canvas.style.display = 'block';
 	current_back_canvas.style.display = 'block'
-	
+
 	ctx = current_canvas.getContext('2d');
 	ctx.lineWidth = lineWidth;
 	ctx.strokeStyle = strokeStyle;
@@ -441,7 +441,7 @@ function set_current(slide_id){
 	if(isrecordingMode){
 		addEventListenertoCanvas(current_canvas);
 	}
-	
+
 	//setPen();
 	var t1 = performance.now();
 	record_to_movements({
@@ -499,9 +499,9 @@ var draw_stop = function(){
 };
 
 var draw_start = function(e){
-	
+
 	movePointer(mouse.x/canvas_width, mouse.y/canvas_height);
-	
+
 	var t1 = performance.now();
     record_to_movements({
 		t:(t1-t0),
@@ -595,7 +595,7 @@ function handleFileSelect(evt){
 						display_error("Invalid PDF");
 					}
 				});
-				
+
 			}, false);
 			reader.readAsDataURL(f);
 		}
@@ -609,7 +609,7 @@ function exportPDF(){
 		canvas_dict[index]['back_canvas'].getContext('2d').drawImage(canvas_dict[index]['front_canvas'], 0, 0, canvas_width, canvas_height);
 		var slideImage = canvas_dict[index]['back_canvas'].toDataURL('image/jpeg',1);
 		doc.addImage(slideImage, 'JPEG',0,0,canvas_width, canvas_height);
-		
+
 	}
 	doc.deletePage(1);
 	doc.save('LecturePDF.pdf');
@@ -618,19 +618,19 @@ function exportPDF(){
 const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
 	const byteCharacters = atob(b64Data);
 	const byteArrays = [];
-	
+
 	for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
 		const slice = byteCharacters.slice(offset, offset + sliceSize);
-		
+
 		const byteNumbers = new Array(slice.length);
 		for (let i = 0; i < slice.length; i++) {
 			byteNumbers[i] = slice.charCodeAt(i);
 		}
-		
+
 		const byteArray = new Uint8Array(byteNumbers);
 		byteArrays.push(byteArray);
 	}
-	
+
 	const blob = new Blob(byteArrays, {type: contentType});
 	return blob;
 }
@@ -642,7 +642,7 @@ function changePointerWidth(width){
 		action: "changePointerWidth",
 		action_param: [width]
 	});
-	
+
 	var ctx = current_canvas.getContext('2d');
 	ctx.lineWidth = width;
 }
@@ -691,21 +691,22 @@ function handleFile(f){
 					var chunks = [];
 					var audioURL = URL.createObjectURL(blob);
 					isSoundinPlayback = true;
-					
+
 					savedAudio = new Howl({
 						src: [audioURL],
 						format: ['webm'],
 						preload: false
 					});
-					
+
 					document.getElementById('audioplayer').style.display = "inline-block";
 					timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
 					hide_loading_screen();
 					savedAudio.once('load', function(){
 						duration = savedAudio._duration;
 						hide_loading_screen();
+						startReplayAudioLoaded();
 					});
-					
+
 				})
 			}
 		});
@@ -729,7 +730,7 @@ function parse_saved_json_to_usable_format(mousemovement){
 	var tList = movementJSON['t'];
 	var actionList = movementJSON['action'];
 	var actionParamList = movementJSON['action_param'];
-	
+
 	while(tList.length>0){
 		var curmove = {}
 		curmove['t'] = tList.shift();
@@ -759,7 +760,7 @@ function replay(){
 	}
 	else if(savedMovements.length == 0 && isSoundinPlayback == false){
 		document.getElementById("issoundpresent").innerHTML = "";
-		
+
 	}
 }
 
@@ -800,10 +801,10 @@ function timeUpdate() {
 	else{
 		curTime = getCurrenttimeofMouseMovement();
 	}
-	
+
 	var playPercent = timelineWidth * (curTime / duration);
 	playhead.style.marginLeft = playPercent + "px";
-	
+
 	if (curTime >= duration) {
 		pButton.className = "";
 		pButton.className = "play";
@@ -820,9 +821,7 @@ function timelineupdate() {
 	requestAnimationFrame(timeUpdate);
 }
 
-function startReplay() {
-	display_loading_screen();
-	savedAudio.load();
+function startReplayAudioLoaded(){
 	playedSavedMovements = new Array();
 	pButton.removeEventListener("click", startReplay);
 	pButton.addEventListener("click", playPauserecording);
@@ -839,6 +838,11 @@ function startReplay() {
 		document.getElementById("issoundpresent").innerHTML = "Sound not present";
 	}
 	globalID = requestAnimationFrame(replay);
+}
+
+function startReplay() {
+	display_loading_screen();
+	savedAudio.load();
 }
 
 function playPauserecording() {
@@ -868,15 +872,15 @@ function clickPercent(event) {
 function syncAudioMouse(toRepet){
 	var temp = performance.now() - savedt0 - delay;
 	var currAudio = savedAudio.seek()*1000;
-	
+
 	if(temp!=currAudio){
 		delay = delay + temp - currAudio;
 	}
-	
+
 	if(toRepet == undefined){
 		syncAudioMouseCall();
 	}
-	
+
 }
 
 function syncAudioMouseCall(){
