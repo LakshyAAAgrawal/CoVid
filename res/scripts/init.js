@@ -20,6 +20,12 @@ function init(){
 	slider.oninput = function() {
 		changePointerWidth(this.value);
 	}
+
+	//// To pop up notification when tab is closed
+	window.onbeforeunload = function() {
+		return ""
+	}
+
 	change_mode('rec');
 	$("#right_scroll_bar").css("height", $(window).height() - (side_bar_width * 3 + 10));
 	pButton = document.getElementById('pButton'); // play button
