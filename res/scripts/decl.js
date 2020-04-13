@@ -867,7 +867,7 @@ function startReplay() {
 	pButton.className = "pause";
 	if (isSoundinPlayback) {
 		savedAudio.play();
-		//syncAudioMouseCall();
+		syncAudioMouseCall();
 	}
 	else{
 		duration = savedMovements[savedMovements.length - 1]['t']/1000;
@@ -1016,7 +1016,7 @@ function rewind(time){
 	switch_canvas_for_replay(curCanvasID);
 	set_current(last_slide_to_display);		// Set the final slide to display
 }
-
+*/
 function syncAudioMouse(toRepet){
 	var temp = performance.now() - savedt0 - delay;
 	var currAudio = savedAudio.seek()*1000;
@@ -1034,4 +1034,3 @@ function syncAudioMouse(toRepet){
 function syncAudioMouseCall(){
 	setTimeout(syncAudioMouse, 1000);
 }
-*/
