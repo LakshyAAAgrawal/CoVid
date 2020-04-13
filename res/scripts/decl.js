@@ -985,6 +985,9 @@ function rewind(time){
 	var i = 0;
 	var last_slide_to_display;
 	var curCanvasID = current_canvas.id;
+	if(time<0){
+		time = 0;
+	}
 	while(i<playedSavedMovements.length){
 
 		var curmove = playedSavedMovements[i];
