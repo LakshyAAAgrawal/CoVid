@@ -1,4 +1,6 @@
 function init(){
+	hide_error();
+	display_loading_screen();
 	canvas_list = [];
 	window.addEventListener('resize', reset_canvas_dimension);
 	reset_canvas_dimension();
@@ -30,7 +32,10 @@ function init(){
 	playhead = document.getElementById('playhead'); // playhead
 	timeline = document.getElementById('timeline'); // timeline
     pButton.addEventListener("click", startReplay);
-	//activateTimeline();
+    //timeline.addEventListener("click", timelineClicked,false);
+    //playhead.addEventListener('mousedown', timelineSelected, false);
+    //window.addEventListener('mouseup', timelineDeselected, false);
+	hide_loading_screen();
 }
 
 init();

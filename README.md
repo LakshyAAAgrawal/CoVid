@@ -1,4 +1,7 @@
 # CoVid
+[![CoVid Demo Video](./res/images/demo_image.png)](http://www.youtube.com/watch?v=ePbTFDbfO74 "CoVid Live Lecture Recording Software - Usage")
+[lakshyaaagrawal.github.io/CoVid/](https://lakshyaaagrawal.github.io/CoVid/)
+
 ## Aim
 To provide an environment for easy recording of university lectures and presentations, with a priority to reducing the recorded session file size.
 

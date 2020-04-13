@@ -51,6 +51,7 @@ body {
 	align-items: center;
 	justify-content: center;
 }
+
 #canvas_container{
 	position: absolute;
 	left: 75px;
@@ -58,14 +59,17 @@ body {
 	right: 75px;
 	text-align: center;
 }
+
 .import_doc{}
 .export_rec{}
+
 .record_control{
 	display:flex;
 	flex-direction: column;
 	align-self: flex-start;
 	margin-top: 2px;
 }
+
 .replay_control{
 	display: inline-block;
 }
@@ -79,6 +83,7 @@ body {
 	border-color: white;
 	box-shadow: 0 25px 25px rgba(0, 0, 0, 0.3);
 }
+
 .color_button:hover{
 	filter: brightness(110%);
 }
@@ -277,4 +282,36 @@ body {
 }
 #credits a{
 	color: #00CC99;
+}
+
+#loading_screen{
+	opacity: 0.5;
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	height: 100%;
+	width: 100%;
+	text-align: center;
+	background: white;
+}
+
+#load_icon{
+	position: relative;
+	margin: auto;
+	top: 50%;
+	transform: translate(0, -60%);
+}
+
+#error_banner{
+	position: fixed;
+	right: 100px;
+	top: 50px;
+	height: 100px;
+	width: 300px;
+	text-align: center;
+	background: red;
+}
+
+#error_msg{
+	color: white;
 }
