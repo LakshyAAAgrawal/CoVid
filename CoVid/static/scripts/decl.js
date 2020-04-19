@@ -171,7 +171,9 @@ function startRecord(){
 	document.getElementById('pauserecordButton').style.display = "inline-block";
 
 	var button = document.getElementById("recordButton");
-	button.setAttribute("src", "res/images/stop_recording.svg");
+	console.log("sdsds");
+	button.setAttribute("src", "static/images/stop_recording.svg");
+	console.log("mmm");
 	button.onclick = stop_record;
 	t0 = performance.now();
 	navigator.mediaDevices.getUserMedia({ audio: true })
@@ -208,7 +210,7 @@ function startRecord(){
 
 function stop_record(){
 	var button = document.getElementById("recordButton");
-	button.setAttribute("src", "res/images/start_recording.svg")
+	button.setAttribute("src", "static/images/start_recording.svg")
 	button.onclick = startRecord;
 	document.getElementById('pauserecordButton').style.display = "none";
 	to_record = false;
@@ -568,7 +570,7 @@ function handleFileSelect(evt){
 				var pdfData = atob(e.target.result.slice(e.target.result.search(";base64,") + 8));
 				var pdfjsLib = window['pdfjs-dist/build/pdf'];
 				var loadingTask = pdfjsLib.getDocument({data: pdfData});
-				pdfjsLib.GlobalWorkerOptions.workerSrc = 'res/scripts/dist/pdfjs/package/build/pdf.worker.js';
+				pdfjsLib.GlobalWorkerOptions.workerSrc = "url('../scripts/dist/pdfjs/package/build/pdf.worker.js')";
 				loadingTask.promise.then(function(pdf) {
 					var pageNumber = 1;
 					for(var i = 1; i <= pdf.numPages; i++){

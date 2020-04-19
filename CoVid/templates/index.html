@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <!--
-	
+
 	CoVid - Software suite for Lecture recordings.
 	Copyright (C) 2020 - Lakshya A Agrawal and Archit Agrawal
 
@@ -22,13 +22,13 @@
   <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
-	<script src="res/scripts/dist/pdfjs/package/build/pdf.js"></script>
-	<script src="res/scripts/dist/jszip.js"></script>
-	<script src="res/scripts/dist/FileSaver.js"></script>
-	<script src="res/scripts/dist/howler.js"></script>
-	<script src="res/scripts/decl.js"></script>
+	<script src="{{ url_for('static', filename='scripts/dist/pdfjs/package/build/pdf.js') }}"></script>
+	<script src="{{ url_for('static', filename='scripts/dist/jszip.js') }}"></script>
+	<script src="{{ url_for('static', filename='scripts/dist/FileSaver.js') }}"></script>
+	<script src="{{ url_for('static', filename='scripts/dist/howler.js') }}"></script>
+	<script src="{{ url_for('static', filename='scripts/decl.js') }}"></script>
 	<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
-	<link rel="stylesheet" href="res/css/styles.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   </head>
 
   <body>
@@ -36,18 +36,18 @@
 
 	<div class="bottom_bar">
 	  <div class="mode_toggle">
-		<img id="view_mode_button" onclick="change_mode('view')" title="Change to view mode" src="res/images/view-mode-button.svg" class="mode_toggle_color_button">View/Record</img>
-		<img id="rec_mode_button" onclick="change_mode('rec')" title="Change to record mode" src="res/images/record-mode-button.svg" class="mode_toggle_color_button"></img>
+		<img id="view_mode_button" onclick="change_mode('view')" title="Change to view mode" src="{{url_for('static', filename='images/view-mode-button.svg')}}" class="mode_toggle_color_button">View/Record</img>
+		<img id="rec_mode_button" onclick="change_mode('rec')" title="Change to record mode" src="{{url_for('static', filename='images/record-mode-button.svg')}}" class="mode_toggle_color_button"></img>
 	  </div>
 
 	  <div class="import_doc rec view">
-		<input type="file" id="upload_slides"  name="files[]" accept="image/*,.pdf" src="res/images/import_base_pdf.svg" style="display:none;"/>
-		<img onclick="$('#upload_slides').click();" title="Import base PDF" src="res/images/import_base_pdf.svg" class="mode_toggle_color_button"></img>
+		<input type="file" id="upload_slides"  name="files[]" accept="image/*,.pdf" src="{{url_for('static', filename='images/import_base_pdf.svg')}}" style="display:none;"/>
+		<img onclick="$('#upload_slides').click();" title="Import base PDF" src="{{url_for('static', filename='images/import_base_pdf.svg')}}" class="mode_toggle_color_button"></img>
 	  </div>
 
 	  <div class="replay_control view">
 		<input type="file" id="upload_recording" name="files[]" style="display:none;"/>
-		<img onclick="$('#upload_recording').click();" title="Upload lecture zip" src="res/images/import_lecture_content.svg" class="mode_toggle_color_button"></img>
+		<img onclick="$('#upload_recording').click();" title="Upload lecture zip" src="{{url_for('static', filename='images/import_lecture_content.svg')}}" class="mode_toggle_color_button"></img>
 		<div id="audioplayer">
 		  <button id="pButton" class="play"></button>
 		  <div id="timeline">
@@ -58,12 +58,12 @@
 	  </div>
 
 	  <div class="export_doc rec">
-		<img id="exportPDF" onclick="exportPDF()" title="Export as PDF" src="res/images/export_pdf.png" class="mode_toggle_color_button"></img>
+		<img id="exportPDF" onclick="exportPDF()" title="Export as PDF" src="{{url_for('static', filename='images/export_pdf.png')}}" class="mode_toggle_color_button"></img>
 	  </div>
 
 	  <div class="record_control rec">
-		<img id="recordButton" onclick="startRecord()" title="Start/Stop Recording" src="res/images/start_recording.svg" class="mode_toggle_color_button"></img>
-		<img id="pauserecordButton" onclick="pauseRecording()" title="Pause/Resume Recording" src="res/images/pause_recording.png" class="mode_toggle_color_button" style="display: none;"></img>
+		<img id="recordButton" onclick="startRecord()" title="Start/Stop Recording" src="{{url_for('static', filename='images/start_recording.svg')}}" class="mode_toggle_color_button"></img>
+		<img id="pauserecordButton" onclick="pauseRecording()" title="Pause/Resume Recording" src="{{url_for('static', filename='images/pause_recording.png')}}" class="mode_toggle_color_button" style="display: none;"></img>
 		<div id="recordingTime" title="Recording Time" ><time>00:00:00</time></div>
 		<div id="issoundRecorded" style="display: inline-block;"></div>
 	  </div>
@@ -74,9 +74,9 @@
 	<div class="left_bar">
 	  <div class="slide_controls rec">
 		<div class="slide_buttons">
-		  <img class="button" title="Next Slide" id="nextSlide" onclick="change_slide(1)" src="res/images/arrow-right-circle.svg"></img>
-		  <img class="button" title="Previous Slide" id="previousSlide" onclick="change_slide(-1)" src="res/images/arrow-left-circle.svg"></img>
-		  <img class="button" title="Add New Slide" onclick="new_slide();" src="res/images/plus-circle.svg"></img>
+		  <img class="button" title="Next Slide" id="nextSlide" onclick="change_slide(1)" src="{{url_for('static', filename='images/arrow-right-circle.svg')}}"></img>
+		  <img class="button" title="Previous Slide" id="previousSlide" onclick="change_slide(-1)" src="{{url_for('static', filename='images/arrow-left-circle.svg')}}"></img>
+		  <img class="button" title="Add New Slide" onclick="new_slide();" src="{{url_for('static', filename='images/plus-circle.svg')}}"></img>
 		</div>
 		<div class="slide_list">
 		  <div class="scrollable" id="right_scroll_bar">
@@ -104,19 +104,19 @@
 		  </div>
 	  </div>
 	</div>
-	<img id="logo_img" src="res/images/covid_logo.png"></img>
+	<img id="logo_img" src="{{url_for('static', filename='images/covid_logo.png')}}"></img>
 	<div class="canvas rec view" id="canvas_container">
 	  <div id="canvas_list"></div>
-	</div>	
+	</div>
 
 	<div id="loading_screen">
-	  <img id="load_icon" src="res/images/loading.gif">
+	  <img id="load_icon" src="{{url_for('static', filename='images/loading.gif')}}">
 	</div>
 
 	<div id="error_banner">
 	  <p id="error_msg"></p>
 	</div>
 
-	<script src="res/scripts/init.js"></script>
+	<script src="{{url_for('static', filename='scripts/init.js')}}"></script>
   </body>
 </html>
