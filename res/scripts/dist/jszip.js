@@ -3459,8 +3459,8 @@ exports.prepareContent = function(name, inputData, isBinary, isOptimizedBinarySt
 
     // if inputData is already a promise, this flatten it.
     var promise = external.Promise.resolve(inputData).then(function(data) {
-        
-        
+
+
         var isBlob = support.blob && (data instanceof Blob || ['[object File]', '[object Blob]'].indexOf(Object.prototype.toString.call(data)) !== -1);
 
         if (isBlob && typeof FileReader !== "undefined") {
@@ -3537,7 +3537,7 @@ ZipEntries.prototype = {
         if (!this.reader.readAndCheckSignature(expectedSignature)) {
             this.reader.index -= 4;
             var signature = this.reader.readString(4);
-            throw new Error("Corrupted zip or bug: unexpected signature " + "(" + utils.pretty(signature) + ", expected " + utils.pretty(expectedSignature) + ")");
+            ////////////////////////////////////////////////////////////////////////////////////////////////////throw new Error("Corrupted zip or bug: unexpected signature " + "(" + utils.pretty(signature) + ", expected " + utils.pretty(expectedSignature) + ")");      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         }
     },
     /**

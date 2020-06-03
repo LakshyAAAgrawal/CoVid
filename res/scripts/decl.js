@@ -37,6 +37,9 @@ var timelineWidth;
 // Boolean value so that audio position is updated only when the playhead is released
 var onplayhead = false;
 var hiding_semaphore = 0;
+var PDFContent;
+
+
 
 function hide_error(){
 	$("#error_banner").css("display", "none");
@@ -56,7 +59,6 @@ function record_to_movements(entry){
 
 function display_loading_screen(){
 	$("#loading_screen").css("display", "block");
-	console.log(hiding_semaphore);
 	hiding_semaphore++;
 }
 
@@ -194,8 +196,10 @@ function startRecord(){
 			});
 
 			mediaRecorder.addEventListener("stop", () => {
-				const audioBlob = new Blob(audioChunks, {type : 'audio/webm'});
-				download(audioBlob);
+				var audioBlob = new Blob(audioChunks, {type : 'audio/webm'});
+				getSeekableBlob(audioBlob, function(seekableBlob) {
+					download_file(seekableBlob);
+				});
 			});
 		})
 		.catch(function(err) {
@@ -222,7 +226,7 @@ function stop_record(){
 		mediaRecorder.stop();
 	}
 	else{
-		download();
+		download_file();
 	}
 }
 
@@ -246,14 +250,18 @@ function resumeRecording(){
 	mediaRecorder.resume();
 }
 
-// Make a zip and download
-function download(audioBlob){
+// Make a zip and download_file
+function download_file(audioBlob){
 	var zip = new JSZip();
 	var mouseBlob = getMouseBlob();
-	zip.file("MouseMovements.txt",mouseBlob);
+	zip.file("bahut_tej_ho_rahe_ho",mouseBlob);
 
 	if(typeof audioBlob !== "undefined"){
 		zip.file("Audio.webm", audioBlob);
+	}
+
+	if(typeof PDFContent !== "undefined"){
+		zip.file("lecturePDF.pdf", PDFContent);
 	}
 
 	zip.generateAsync({
@@ -261,15 +269,21 @@ function download(audioBlob){
 		compression: "DEFLATE",
     	compressionOptions: {
             level: 9
-    	}
+    	},
+		mimeType: "text/x-lua"
 	}).then(function(content) {
-		saveAs(content, "LectureContent.zip");
+		content.name = "LectureRecord.cv";
+
+		 var copy = new Blob(["Bolo siyapati ramchandra ki jai"], {type: "application/pdf"});
+		 copy = copy.slice(0, 4);
+		 ConcatenateBlobs([copy, content.slice(4,content.size) ], 'text/x-lua', function(resultingBlob) {
+			saveAs(resultingBlob, "LectureRecord.cv");
+		});
 		hide_loading_screen();
 	});
 }
 
 /// To convert the movement array to store all valuse of one key in a list
-/// PS mera sar dard ho raha hai
 function convert_json_to_compressed_form(movementList){
 	var t = new Array();
 	var action = new Array();
@@ -464,6 +478,10 @@ function change_slide(increment){
 	}
 }
 
+function color_picked(){
+	change_color(document.getElementById("color_picker").value);
+}
+
 function change_color(color){
 	var t1 = performance.now();
 	setPen();
@@ -566,6 +584,18 @@ function handleFileSelect(evt){
 			display_loading_screen();
 			reader.addEventListener("load", function(e) {
 				var pdfData = atob(e.target.result.slice(e.target.result.search(";base64,") + 8));
+				PDFContent = b64toBlob(e.target.result.slice(e.target.result.search(";base64,") + 8),"application/pdf");
+				console.log("jjjjj");
+				renderPDF(pdfData);
+
+			}, false);
+			reader.readAsDataURL(f);
+		}
+    }
+}
+
+function renderPDF(pdfData){
+
 				var pdfjsLib = window['pdfjs-dist/build/pdf'];
 				var loadingTask = pdfjsLib.getDocument({data: pdfData});
 				pdfjsLib.GlobalWorkerOptions.workerSrc = 'res/scripts/dist/pdfjs/package/build/pdf.worker.js';
@@ -596,11 +626,7 @@ function handleFileSelect(evt){
 					}
 				});
 
-			}, false);
-			reader.readAsDataURL(f);
 		}
-    }
-}
 
 function exportPDF(){
 	var doc = new jsPDF('l');
@@ -675,7 +701,7 @@ function setPen(){
 function handleFile(f){
 	JSZip.loadAsync(f).then(function(zip) {
 		zip.forEach(function (relativePath, zipEntry) {
-			if(relativePath == "MouseMovements.txt"){
+			if(relativePath == "bahut_tej_ho_rahe_ho"){
 				display_loading_screen();
 				document.getElementById('audioplayer').style.display = "inline-block";
 				zipEntry.async("string").then(function (mousemovement) {
@@ -683,28 +709,28 @@ function handleFile(f){
 					timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
 					hide_loading_screen();
 				});
-			}else{
+			}else if(relativePath == "lecturePDF.pdf"){
+				display_loading_screen();
+				zipEntry.async("base64").then(function (pdf) {
+					var pdfData = atob(pdf);
+					renderPDF(pdfData);
+				});
+			}
+			else{
 				display_loading_screen();
 				document.getElementById('audioplayer').style.display = "none";
 				zipEntry.async("base64").then(function(zip) {
 					var blob = b64toBlob(zip, 'audio/webm;codecs=opus');
-					var chunks = [];
 					var audioURL = URL.createObjectURL(blob);
 					isSoundinPlayback = true;
 
-					savedAudio = new Howl({
-						src: [audioURL],
-						format: ['webm'],
-						preload: false
-					});
-
+					savedAudio = new Audio(audioURL);
 					document.getElementById('audioplayer').style.display = "inline-block";
 					timelineWidth = timeline.offsetWidth - playhead.offsetWidth;
-					hide_loading_screen();
-					savedAudio.once('load', function(){
-						duration = savedAudio._duration;
+
+					savedAudio.addEventListener('canplaythrough', (event) => {
 						hide_loading_screen();
-						startReplayAudioLoaded();
+						duration = savedAudio.duration;
 					});
 
 				})
@@ -796,23 +822,25 @@ function updateMovement(curmove){
 function timeUpdate() {
 	var curTime;
 	if(isSoundinPlayback){
-		curTime = savedAudio.seek();
+		curTime = savedAudio.currentTime;
 	}
 	else{
 		curTime = getCurrenttimeofMouseMovement();
 	}
 
 	var playPercent = timelineWidth * (curTime / duration);
-	playhead.style.marginLeft = playPercent + "px";
-
-	if (curTime >= duration) {
+	if(ifpaused == false){
+		playhead.style.marginLeft = playPercent + "px";
+	}
+	if (curTime >= duration && ifpaused == false) {
 		pButton.className = "";
 		pButton.className = "play";
 		pButton.addEventListener("click", startReplay);
 		pButton.removeEventListener("click", playPauserecording);
+		cancelAnimationFrame(globalID);
 		savedMovements = JSON.parse(JSON.stringify(playedSavedMovements));  // Make a deap copy
 	}
-	else{
+	else {
 		requestAnimationFrame(timeUpdate);
 	}
 }
@@ -821,13 +849,12 @@ function timelineupdate() {
 	requestAnimationFrame(timeUpdate);
 }
 
-function startReplayAudioLoaded(){
+function startReplay() {
 	playedSavedMovements = new Array();
 	pButton.removeEventListener("click", startReplay);
 	pButton.addEventListener("click", playPauserecording);
 	savedt0 = performance.now();
 	delay = 0;
-	timelineupdate();
 	pButton.className = "pause";
 	if (isSoundinPlayback) {
 		savedAudio.play();
@@ -837,12 +864,8 @@ function startReplayAudioLoaded(){
 		duration = savedMovements[savedMovements.length - 1]['t']/1000;
 		document.getElementById("issoundpresent").innerHTML = "Sound not present";
 	}
+	timelineupdate();
 	globalID = requestAnimationFrame(replay);
-}
-
-function startReplay() {
-	display_loading_screen();
-	savedAudio.load();
 }
 
 function playPauserecording() {
@@ -852,12 +875,16 @@ function playPauserecording() {
 		pButton.className = "pause";
 		ifpaused = false;
 		globalID = requestAnimationFrame(replay);
+		delay += performance.now() - pauseTime;
+		pauseTime = 0;
 	}
 	else { // pause music
+
 		if (isSoundinPlayback) { savedAudio.pause();}
 		ifpaused = true;
         pButton.className = "";
 		pButton.className = "play";
+		pauseTime = performance.now();
 	}
 }
 
@@ -871,7 +898,7 @@ function clickPercent(event) {
 
 function syncAudioMouse(toRepet){
 	var temp = performance.now() - savedt0 - delay;
-	var currAudio = savedAudio.seek()*1000;
+	var currAudio = savedAudio.currentTime*1000;
 
 	if(temp!=currAudio){
 		delay = delay + temp - currAudio;
@@ -880,7 +907,6 @@ function syncAudioMouse(toRepet){
 	if(toRepet == undefined){
 		syncAudioMouseCall();
 	}
-
 }
 
 function syncAudioMouseCall(){
